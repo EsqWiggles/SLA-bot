@@ -1,18 +1,21 @@
-import discord
 import asyncio
 
-client = discord.Client()
+import discord
+from   discord.ext import commands
 
-@client.event
+
+
+bot = commands.Bot(command_prefix='!', description='test')
+
+@bot.event
 async def on_ready():
     print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
+    print(bot.user.name)
+    print(bot.user.id)
     print('------')
+    
+@bot.command()
+async def test():
+    await bot.say('Hello World!')
 
-@client.event
-async def on_message(message):
-    if message.content.startswith('!test'):
-        await client.send_message(message.channel, 'Hello world!')
-
-client.run('paste_token_here')
+bot.run('paste_token_here')
