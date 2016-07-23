@@ -45,8 +45,26 @@ class Schedule:
                         current_events.append(component)
         current_events.sort(key=lambda event: event.get('dtstart').dt, reverse=True)
         self._events = current_events
+    
+    
+    def prev_weekday(weekday, at):
+        curr = dt.datetime.now(dt.timezone.utc)
+        prev = curr.replace(hour=at.hour, minute=at.minute,
+                            second=at.second, microsecond=0)
+        while(prev >= curr or prev.isoweekday() != weekday):
+            prev = prev - dt.timedelta(days=1)
+        return prev
+
+    def prev_maint():
+        m_time = dt.datetime.strptime(cf.maint_time, '%H:%M:%S')
+        return Schedule.prev_weekday(cf.maint_weekday, m_time)
+    
+    async def update(self):
+        downloaded = await Schedule.download(cf.cal_url, cf.cal_path)
+        if downloaded == True:
+            await self.grab_events(cf.cal_path, Schedule.prev_maint())
         
-        
+    #string generally too big, split up messages by day?
     @commands.command()
     async def eq_print(self):
         jst = pytz.timezone('Asia/Tokyo')

@@ -17,13 +17,11 @@ async def on_ready():
     print('------')
     
     event_schedule = Schedule(bot)
-    await Schedule.download(cf.cal_url, cf.cal_path)
-    await event_schedule.grab_events(cf.cal_path, dt.datetime.now(dt.timezone.utc))
-
+    await event_schedule.update()
     bot.add_cog(event_schedule)
     
 @bot.command()
 async def test():
     await bot.say('Hello World!')
-
+    
 bot.run('paste_token_here')
