@@ -63,17 +63,32 @@ class Schedule:
         downloaded = await Schedule.download(cf.cal_url, cf.cal_path)
         if downloaded == True:
             await self.grab_events(cf.cal_path, Schedule.prev_maint())
-        
-    #string generally too big, split up messages by day?
+    
+    async def event_print(self, start=None, end=None, tz=None):
+        if tz == None:
+            tz = pytz.timezone('Asia/Tokyo')
+        prev_date = dt.datetime(dt.MINYEAR, 2, 2, tzinfo=tz).date()
+        msg_chunk = '==== EQ Schedule ===='
+        for e in self._events:
+            start_time = e.get('dtstart').dt.astimezone(tz)
+            if start != None and start_time < start:
+                continue
+            if end != None and start_time > end :
+                continue
+            
+            name = e.get('summary')
+            relative_time = math.ceil(( e.get('dtstart').dt - dt.datetime.now(dt.timezone.utc)).total_seconds()/60)
+            msg = ('\n{0:36} | {1:4}m | {2}'.format(name, relative_time, start_time))
+            if start_time.date() != prev_date:
+                await self.bot.say('```{}```'.format(msg_chunk))
+                msg_chunk = start_time.strftime('%A - %Y/%m/%d')
+                prev_date = start_time.date()
+            msg_chunk += msg
+
+        await self.bot.say('```{}```'.format(msg_chunk))
+    
     @commands.command()
     async def eq_print(self):
-        jst = pytz.timezone('Asia/Tokyo')
-        msg = ''
-        for event in self._events:
-            name = event.get('summary')
-            start_time = event.get('dtstart').dt.astimezone(jst)
-            relative_time = math.ceil((start_time - dt.datetime.now(dt.timezone.utc)).total_seconds()/60)
-            msg += ('{0:36} | {1:4}m | {2}\n'.format(name, relative_time, start_time))
-        await self.bot.say('```{}```'.format(msg))
- 
+        await self.event_print(start=dt.datetime.now(tz=dt.timezone.utc))
+
         
