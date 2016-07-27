@@ -56,8 +56,10 @@ class Schedule:
         return prev
 
     def prev_maint():
-        m_time = dt.datetime.strptime(cf.maint_time, '%H:%M:%S')
-        return Schedule.prev_weekday(cf.maint_weekday, m_time)
+        maint_time = cf.config.get('EQ_Schedule', 'maint_time')
+        maint_weekday = cf.config.getint('EQ_Schedule', 'maint_weekday')
+        m_time = dt.datetime.strptime(maint_time, '%H:%M:%S')
+        return Schedule.prev_weekday(maint_weekday, m_time)
     
     async def update(self):
         downloaded = await Schedule.download(cf.cal_url, cf.cal_path)

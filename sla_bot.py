@@ -23,5 +23,7 @@ async def on_ready():
 @bot.command()
 async def test():
     await bot.say('Hello World!')
-    
-bot.run('paste_token_here')
+
+
+cf.load_config()   
+bot.run(cf.config.get('Bot', 'token'))
