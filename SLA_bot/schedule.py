@@ -68,22 +68,26 @@ class Schedule:
     
     async def event_print(self, start=None, end=None, tz=None):
         if tz == None:
-            tz = pytz.timezone('Asia/Tokyo')
-        prev_date = dt.datetime(dt.MINYEAR, 2, 2, tzinfo=tz).date()
-        msg_chunk = '==== EQ Schedule ===='
+            tz = pytz.timezone(cf.config.get('Bot', 'default_timezone'))
+
+        prev_date = None
+        msg_chunk = None
+
         for e in self._events:
             start_time = e.get('dtstart').dt.astimezone(tz)
             if start != None and start_time < start:
                 continue
             if end != None and start_time > end :
                 continue
-            
+
             name = e.get('summary')
-            relative_time = math.ceil(( e.get('dtstart').dt - dt.datetime.now(dt.timezone.utc)).total_seconds()/60)
-            msg = ('\n{0:36} | {1:4}m | {2}'.format(name, relative_time, start_time))
+            start_str = start_time.strftime('%H:%M:%S')
+            msg = ('\n{0} | {1}'.format(start_str, name))
             if start_time.date() != prev_date:
-                await self.bot.say('```{}```'.format(msg_chunk))
-                msg_chunk = start_time.strftime('%A - %Y/%m/%d')
+                if msg_chunk != None:
+                    await self.bot.say('```{}```'.format(msg_chunk))
+                msg_chunk = start_time.strftime('%A %Y-%m-%d %Z\n')
+                msg_chunk += '================================'
                 prev_date = start_time.date()
             msg_chunk += msg
 

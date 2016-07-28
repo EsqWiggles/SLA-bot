@@ -16,6 +16,7 @@ config = configparser.ConfigParser(allow_no_value = True)
 def make_default():
     config.add_section('Bot')
     config.set('Bot', 'token', 'paste_bot_token_here')
+    config.set('Bot', 'default_timezone', 'Asia/Tokyo')
     config.add_section('EQ_Schedule')
     config.set('EQ_Schedule', 'maint_weekday', '3')
     config.set('EQ_Schedule', 'maint_time', '02:00:00')
