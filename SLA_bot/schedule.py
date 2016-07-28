@@ -43,7 +43,7 @@ class Schedule:
                     start_dt = component.get('dtstart').dt
                     if start_dt >= from_dt and (to_dt == None or start_dt <= to_dt):
                         current_events.append(component)
-        current_events.sort(key=lambda event: event.get('dtstart').dt, reverse=True)
+        current_events.sort(key=lambda event: event.get('dtstart').dt)
         self._events = current_events
     
     
@@ -73,7 +73,7 @@ class Schedule:
         prev_date = None
         msg_chunk = None
 
-        for e in self._events:
+        for e in reversed(self._events):
             start_time = e.get('dtstart').dt.astimezone(tz)
             if start != None and start_time < start:
                 continue
