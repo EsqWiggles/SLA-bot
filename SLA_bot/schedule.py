@@ -94,7 +94,10 @@ class Schedule:
         await self.bot.say('```{}```'.format(msg_chunk))
     
     @commands.command()
-    async def eq_print(self):
-        await self.event_print(start=dt.datetime.now(tz=dt.timezone.utc))
+    async def eq_print(self, u_tz=None):
+        if u_tz == None:
+            u_tz = pytz.timezone(cf.config.get('Bot', 'default_timezone'))
+        timezone = pytz.timezone(u_tz)
+        await self.event_print(start=dt.datetime.now(tz=dt.timezone.utc), tz=timezone)
 
         
