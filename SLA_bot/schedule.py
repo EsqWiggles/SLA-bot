@@ -9,7 +9,7 @@ from   discord.ext import commands
 import icalendar as ical
 import pytz
 
-import SLA_bot.config as cf
+from SLA_bot.config import Config as cf
 
 class Schedule:
     def __init__(self, bot):
@@ -56,10 +56,8 @@ class Schedule:
         return prev
 
     def prev_maint():
-        maint_time = cf.config.get('EQ_Schedule', 'maint_time')
-        maint_weekday = cf.config.getint('EQ_Schedule', 'maint_weekday')
-        m_time = dt.datetime.strptime(maint_time, '%H:%M:%S')
-        return Schedule.prev_weekday(maint_weekday, m_time)
+        m_time = dt.datetime.strptime(cf.wkstart_time, '%H:%M:%S')
+        return Schedule.prev_weekday(cf.wkstart_weekday, m_time)
     
     async def update(self):
         downloaded = await Schedule.download(cf.cal_url, cf.cal_path)
@@ -68,7 +66,7 @@ class Schedule:
     
     async def event_print(self, start=None, end=None, tz=None):
         if tz == None:
-            tz = pytz.timezone(cf.config.get('Bot', 'default_timezone'))
+            tz = pytz.timezone(cf.tz)
 
         prev_date = None
         msg_chunk = None
@@ -96,7 +94,7 @@ class Schedule:
     @commands.command()
     async def eq_print(self, u_tz=None):
         if u_tz == None:
-            u_tz = pytz.timezone(cf.config.get('Bot', 'default_timezone'))
+            u_tz = cf.tz
         timezone = pytz.timezone(u_tz)
         await self.event_print(start=dt.datetime.now(tz=dt.timezone.utc), tz=timezone)
 

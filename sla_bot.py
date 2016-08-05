@@ -4,8 +4,8 @@ import datetime as dt
 import discord
 from   discord.ext import commands
 
-import SLA_bot.config as cf
-from   SLA_bot.schedule import Schedule
+from SLA_bot.config import Config as cf
+from SLA_bot.schedule import Schedule
 
 bot = commands.Bot(command_prefix='!', description='test')
 
@@ -26,4 +26,4 @@ async def test():
 
 
 cf.load_config()   
-bot.run(cf.config.get('Bot', 'token'))
+bot.run(cf.token)
