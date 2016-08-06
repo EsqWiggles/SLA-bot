@@ -63,6 +63,24 @@ class Schedule:
         downloaded = await Schedule.download(cf.cal_url, cf.cal_path)
         if downloaded == True:
             await self.grab_events(cf.cal_path, Schedule.prev_maint())
+            
+    def parse_tz(tz_str, custom=None):
+        if custom != None:
+            custom_tz = tz_str.lower()
+            if custom_tz in custom:
+                return custom[custom_tz]
+                
+        country_code = tz_str.upper()
+        if country_code in pytz.country_timezones:
+            return pytz.country_timezones[country_code][0]
+
+        try:
+            pytz.timezone(tz_str)
+            return tz_str
+        except pytz.exceptions.UnknownTimeZoneError:
+            return None
+
+        return None
     
     async def event_print(self, start=None, end=None, tz=None):
         if tz == None:
@@ -92,10 +110,13 @@ class Schedule:
         await self.bot.say('```{}```'.format(msg_chunk))
     
     @commands.command()
-    async def eq_print(self, u_tz=None):
-        if u_tz == None:
-            u_tz = cf.tz
-        timezone = pytz.timezone(u_tz)
+    async def eq_print(self, tz_str=None):
+        timezone = None
+        if tz_str != None:
+            try:
+                timezone = pytz.timezone(Schedule.parse_tz(tz_str))
+            except:
+                return
         await self.event_print(start=dt.datetime.now(tz=dt.timezone.utc), tz=timezone)
 
         
