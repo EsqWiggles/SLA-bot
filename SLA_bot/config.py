@@ -22,6 +22,8 @@ class Config:
         cf.set('EQ_Schedule', 'maint_weekday', '3')
         cf.set('EQ_Schedule', 'maint_time', '02:00:00')
         cf.set('EQ_Schedule', 'file_path', Config.cal_path)
+        cf.add_section('Timezones')
+        cf.set('Timezones', 'us-pst', 'America/Los_Angeles')
         
     def parse_values(cf):
         Config.token = cf.get('Bot', 'token')
@@ -29,6 +31,7 @@ class Config:
         Config.wkstart_weekday = cf.getint('EQ_Schedule', 'maint_weekday')
         Config.wkstart_time = cf.get('EQ_Schedule', 'maint_time')
         Config.cal_path = cf.get('EQ_Schedule', 'file_path')
+        Config.custom_tz = dict(cf.items('Timezones'))
         
     def load_config():
         Config.make_default(Config._user_cf)

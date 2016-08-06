@@ -113,10 +113,10 @@ class Schedule:
     async def eq_print(self, tz_str=None):
         timezone = None
         if tz_str != None:
-            try:
-                timezone = pytz.timezone(Schedule.parse_tz(tz_str))
-            except:
+            parsed = Schedule.parse_tz(tz_str, cf.custom_tz)
+            if parsed == None:
                 return
+            timezone = pytz.timezone(parsed)
         await self.event_print(start=dt.datetime.now(tz=dt.timezone.utc), tz=timezone)
 
         
