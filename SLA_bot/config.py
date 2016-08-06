@@ -40,7 +40,7 @@ class Config:
 
         
 if __name__=='__main__':
-    Config.make_default()
+    Config.make_default(Config._user_cf)
     with open(Config.config_path, "w") as config_file:
         Config._user_cf.write(config_file)
 
