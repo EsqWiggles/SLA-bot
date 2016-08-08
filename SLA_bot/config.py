@@ -230,7 +230,8 @@ class Config:
     ]
 
 if __name__=='__main__':
+    default_cf = os.path.abspath(os.path.join(__file__, '../default_config.ini'))
     Config.make_default(Config._user_cf)
-    with open(Config.config_path, "w") as config_file:
+    with open(default_cf, "w") as config_file:
         Config._user_cf.write(config_file)
 
