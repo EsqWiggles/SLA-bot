@@ -64,22 +64,43 @@ class Schedule:
         if downloaded == True:
             await self.grab_events(cf.cal_path, Schedule.prev_maint())
             
-    def parse_tz(tz_str, custom=None):
+    def utctz_offset(offset):
+        h,sep,m = offset.partition(':')
+        h = int(h)
+        sign = 1
+        if h < 0:
+            sign = -1
+        if m == '':
+            m = 0
+        else:
+            m = int(m)
+        m = sign * m
+        utc_tz = dt.timezone(dt.timedelta(hours=h, minutes=m))
+        return utc_tz
+            
+    def parse_tz(tz_str, default_tz=None, custom=None):
+        if tz_str == None or tz_str == '':
+            return default_tz
+        
+        try:
+            return Schedule.utctz_offset(tz_str)
+        except ValueError:
+            pass
+    
         if custom != None:
             custom_tz = tz_str.lower()
             if custom_tz in custom:
-                return custom[custom_tz]
+                return pytz.timezone(custom[custom_tz])
                 
         country_code = tz_str.upper()
         if country_code in pytz.country_timezones:
-            return pytz.country_timezones[country_code][0]
+            return pytz.timezone(pytz.country_timezones[country_code][0])
 
         try:
-            pytz.timezone(tz_str)
-            return tz_str
+            return pytz.timezone(tz_str)
         except pytz.exceptions.UnknownTimeZoneError:
             return None
-
+  
         return None
     
     async def event_print(self, start=None, end=None, tz=None):
@@ -111,12 +132,10 @@ class Schedule:
     
     @commands.command()
     async def eq_print(self, tz_str=None):
-        timezone = None
-        if tz_str != None:
-            parsed = Schedule.parse_tz(tz_str, cf.custom_tz)
-            if parsed == None:
-                return
-            timezone = pytz.timezone(parsed)
+        default = pytz.timezone(cf.tz)
+        timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
+        if timezone == None:
+            return
         await self.event_print(start=dt.datetime.now(tz=dt.timezone.utc), tz=timezone)
 
         
