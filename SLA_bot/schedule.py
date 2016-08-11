@@ -158,7 +158,10 @@ class Schedule:
         elif mode == 'all':
             events = await self.filter_events()
         else:
-            pass
+            dates = ut.parse_md(mode, timezone)
+            events = []
+            for d in dates:
+                events.extend(await self.filter_events(d, ut.day(d, 1, timezone)))
         await self.event_print(events, timezone)
 
         
