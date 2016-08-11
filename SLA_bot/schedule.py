@@ -9,7 +9,8 @@ from   discord.ext import commands
 import icalendar as ical
 import pytz
 
-from SLA_bot.config import Config as cf
+from   SLA_bot.config import Config as cf
+import SLA_bot.util as ut
 
 class Schedule:
     def __init__(self, bot):
@@ -103,20 +104,26 @@ class Schedule:
   
         return None
     
-    async def event_print(self, start=None, end=None, tz=None):
+    async def filter_events(self, earliest=None, latest=None):
+        events = []
+        for e in self._events:
+            start_time = e.get('dtstart').dt
+            if earliest != None and start_time < earliest:
+                 continue
+            if latest != None and start_time >= latest :
+                 continue
+            events.append(e)
+        return events
+    
+    async def event_print(self, events, tz=None):
         if tz == None:
             tz = pytz.timezone(cf.tz)
 
         prev_date = None
         msg_chunk = None
 
-        for e in reversed(self._events):
+        for e in reversed(events):
             start_time = e.get('dtstart').dt.astimezone(tz)
-            if start != None and start_time < start:
-                continue
-            if end != None and start_time > end :
-                continue
-
             name = e.get('summary')
             start_str = start_time.strftime('%H:%M:%S')
             msg = ('\n{0} | {1}'.format(start_str, name))
@@ -131,11 +138,27 @@ class Schedule:
         await self.bot.say('```{}```'.format(msg_chunk))
     
     @commands.command()
-    async def eq_print(self, tz_str=None):
+    async def eq_print(self, mode='today', tz_str=None):
         default = pytz.timezone(cf.tz)
         timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
         if timezone == None:
             return
-        await self.event_print(start=dt.datetime.now(tz=dt.timezone.utc), tz=timezone)
+
+        today = ut.day(dt.datetime.now(timezone), 0, timezone)
+        if mode == 'today':
+            events = await self.filter_events(today, ut.day(today, 1, timezone))
+        elif mode == 'yesterday':
+            events = await self.filter_events(ut.day(today, -1, timezone), today)
+        elif mode == 'tomorrow':
+            events = await self.filter_events(ut.day(today, 1, timezone), ut.day(today, 2, timezone))
+        elif mode == 'past':
+            events = await self.filter_events(latest = dt.datetime.now(dt.datetime.utc))
+        elif mode == 'future':
+            events = await self.filter_events(earliest = dt.datetime.now(dt.datetime.utc))
+        elif mode == 'all':
+            events = await self.filter_events()
+        else:
+            pass
+        await self.event_print(events, timezone)
 
         
