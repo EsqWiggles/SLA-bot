@@ -33,3 +33,23 @@ def parse_md(md_str, tz):
         next = curr.replace(year=curr.year+1)
         guess_dt.append(day(next, 0, tz))
     return guess_dt
+    
+def unitsfdelta(tdelta):
+    total_s = int(tdelta.total_seconds())
+    day, remain_s = divmod(total_s, 24*60*60)
+    hour, remain_s = divmod(remain_s, 60*60)
+    min, sec = divmod(remain_s, 60)
+    return day, hour, min, sec
+    
+    
+def strfdelta(tdelta, unit_str = ('days', 'hr', 'min', 'sec')):
+    units = unitsfdelta(tdelta)
+    last = len(units) - 1
+    for i in range(0, len(units)):
+        if units[i] == 0 and i != last:
+            continue
+        
+        parts = ['{}{}'.format(units[i], unit_str[i])]
+        if i < last and units[i+1] != 0:
+            parts.append('{}{}'.format(units[i+1], unit_str[i+1]))
+        return ' '.join(parts)

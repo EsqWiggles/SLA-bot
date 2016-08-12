@@ -137,6 +137,17 @@ class Schedule:
 
         await self.bot.say('```{}```'.format(msg_chunk))
     
+    async def find_event(events, search='', max=-1):
+        found = []
+        count = 0
+        for e in events:
+            if search in e.get('summary').lower():
+                found.append(e)
+                count += 1
+                if count >= max and max != -1:
+                    break;
+        return found
+    
     @commands.command()
     async def eq_print(self, mode='today', tz_str=None):
         default = pytz.timezone(cf.tz)
@@ -165,3 +176,28 @@ class Schedule:
         await self.event_print(events, timezone)
 
         
+    @commands.command()
+    async def next(self, search='', tz_str=None):
+        default = pytz.timezone(cf.tz)
+        timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
+        now = dt.datetime.now(dt.timezone.utc)
+        upcoming = await self.filter_events(earliest = now)
+        matched = await Schedule.find_event(upcoming, search.lower(), 1)
+
+        if len(matched) == 0 and tz_str == None:
+            maybe_tz = Schedule.parse_tz(search, default, cf.custom_tz)
+            if maybe_tz != None:
+                matched = await Schedule.find_event(upcoming, '', 1)
+                timezone = maybe_tz
+        
+        if len(matched) >= 1:
+            e = matched[0]
+            name = e.get('summary')
+            start = e.get('dtstart').dt
+            relative = ut.strfdelta(start - now)
+            start_str = start.astimezone(timezone).strftime('%b %d   %H:%M %Z')
+            msg = 'In {} - **{}** - {}'.format(relative, name, start_str)
+        else:
+            msg = 'No scheduled {} found.'.format(search)
+
+        await self.bot.say(msg)
