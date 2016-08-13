@@ -184,11 +184,6 @@ class Schedule:
         upcoming = await self.filter_events(earliest = now)
         matched = await Schedule.find_event(upcoming, search.lower(), 1)
 
-        if len(matched) == 0 and tz_str == None:
-            maybe_tz = Schedule.parse_tz(search, default, cf.custom_tz)
-            if maybe_tz != None:
-                matched = await Schedule.find_event(upcoming, '', 1)
-                timezone = maybe_tz
         
         if len(matched) >= 1:
             e = matched[0]
