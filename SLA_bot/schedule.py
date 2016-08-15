@@ -154,9 +154,13 @@ class Schedule:
         for e in events:
             name = e.get('summary')
             start = e.get('dtstart').dt
-            relative = ut.strfdelta(start - now)
             start_str = start.astimezone(tz).strftime('%b %d   %H:%M %Z')
-            e_str = 'In {} - **{}** - {}'.format(relative, name, start_str)
+            diff = start - now
+            relative = ut.strfdelta(abs(diff))
+            if diff >= dt.timedelta(0):
+                e_str = 'In {} - **{}** - {}'.format(relative, name, start_str)
+            else:
+                e_str = '{} ago - **{}** - {}'.format(relative, name, start_str)
             events_str.append(e_str)
         return events_str
     
