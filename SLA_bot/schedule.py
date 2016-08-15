@@ -137,7 +137,7 @@ class Schedule:
 
         await self.bot.say('```{}```'.format(msg_chunk))
     
-    async def find_event(events, search='', max=-1):
+    def find_event(events, search='', max=-1):
         found = []
         count = 0
         for e in events:
@@ -147,6 +147,19 @@ class Schedule:
                 if count >= max and max != -1:
                     break;
         return found
+    
+    def relstr_event(events, tz):
+        events_str = []
+        now = dt.datetime.now(dt.timezone.utc)
+        for e in events:
+            name = e.get('summary')
+            start = e.get('dtstart').dt
+            relative = ut.strfdelta(start - now)
+            start_str = start.astimezone(tz).strftime('%b %d   %H:%M %Z')
+            e_str = 'In {} - **{}** - {}'.format(relative, name, start_str)
+            events_str.append(e_str)
+        return events_str
+    
     
     @commands.command()
     async def eq_print(self, mode='today', tz_str=None):
@@ -163,9 +176,9 @@ class Schedule:
         elif mode == 'tomorrow':
             events = await self.filter_events(ut.day(today, 1, timezone), ut.day(today, 2, timezone))
         elif mode == 'past':
-            events = await self.filter_events(latest = dt.datetime.now(dt.datetime.utc))
+            events = await self.filter_events(latest = dt.datetime.now(dt.timezone.utc))
         elif mode == 'future':
-            events = await self.filter_events(earliest = dt.datetime.now(dt.datetime.utc))
+            events = await self.filter_events(earliest = dt.datetime.now(dt.timezone.utc))
         elif mode == 'all':
             events = await self.filter_events()
         else:
@@ -175,23 +188,33 @@ class Schedule:
                 events.extend(await self.filter_events(d, ut.day(d, 1, timezone)))
         await self.event_print(events, timezone)
 
+    @commands.command()
+    async def find(self, search='', mode='future', tz_str=''):
+        default = pytz.timezone(cf.tz)
+        timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
+        events = []
+        if mode == 'past':
+            events = await self.filter_events(latest = dt.datetime.now(dt.timezone.utc))
+        elif mode == 'future':
+            events = await self.filter_events(earliest = dt.datetime.now(dt.timezone.utc))
+        elif mode == 'all':
+            events = await self.filter_events()
+        matched = Schedule.find_event(events, search,-1)
+        messages = Schedule.relstr_event(matched, timezone)
+        for msg in messages:
+            await self.bot.say(msg)
+            
         
     @commands.command()
-    async def next(self, search='', tz_str=None):
+    async def next(self, search='', tz_str=''):
         default = pytz.timezone(cf.tz)
         timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
         now = dt.datetime.now(dt.timezone.utc)
         upcoming = await self.filter_events(earliest = now)
-        matched = await Schedule.find_event(upcoming, search.lower(), 1)
-
+        matched = Schedule.find_event(upcoming, search.lower(), 1)
         
         if len(matched) >= 1:
-            e = matched[0]
-            name = e.get('summary')
-            start = e.get('dtstart').dt
-            relative = ut.strfdelta(start - now)
-            start_str = start.astimezone(timezone).strftime('%b %d   %H:%M %Z')
-            msg = 'In {} - **{}** - {}'.format(relative, name, start_str)
+            msg = Schedule.relstr_event(matched, timezone)[0]
         else:
             msg = 'No scheduled {} found.'.format(search)
 
