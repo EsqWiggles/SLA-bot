@@ -223,3 +223,20 @@ class Schedule:
             msg = 'No scheduled {} found.'.format(search)
 
         await self.bot.say(msg)
+        
+        
+    @commands.command()
+    async def last(self, search='', tz_str=''):
+        default = pytz.timezone(cf.tz)
+        timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
+        now = dt.datetime.now(dt.timezone.utc)
+        upcoming = await self.filter_events(latest = now)
+        upcoming.reverse()
+        matched = Schedule.find_event(upcoming, search.lower(), 1)
+        
+        if len(matched) >= 1:
+            msg = Schedule.relstr_event(matched, timezone)[0]
+        else:
+            msg = 'No scheduled {} found.'.format(search)
+
+        await self.bot.say(msg)
