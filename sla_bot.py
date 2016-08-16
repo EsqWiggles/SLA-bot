@@ -1,11 +1,18 @@
 import asyncio
 import datetime as dt
-
+import os
 import discord
 from   discord.ext import commands
 
 from SLA_bot.config import Config as cf
 from SLA_bot.schedule import Schedule
+
+curr_dir = os.path.dirname(__file__)
+configs = [
+    os.path.join(curr_dir, 'docs', 'default_config.ini'),
+    os.path.join(curr_dir, 'config.ini')
+]
+cf.load_config(configs)  
 
 bot = commands.Bot(command_prefix='!', description='test')
 
@@ -25,5 +32,5 @@ async def test():
     await bot.say('Hello World!')
 
 
-cf.load_config()   
+ 
 bot.run(cf.token)
