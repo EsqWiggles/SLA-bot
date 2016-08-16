@@ -137,14 +137,23 @@ class Schedule:
 
         await self.bot.say('```{}```'.format(msg_chunk))
     
-    def find_event(events, search='', max=-1):
+    def find_event(events, search='', max=-1, custom=None):
         found = []
         count = 0
         for e in events:
-            if search in e.get('summary').lower():
-                found.append(e)
-                count += 1
-                if count >= max and max != -1:
+            if count >= max and max != -1:
+                break;
+            
+            searches = []
+            try:
+                searches = custom[search]
+            except (KeyError, TypeError):
+                searches.append(search)
+
+            for s in searches:
+                if s.lower() in e.get('summary').lower():
+                    found.append(e)
+                    count += 1
                     break;
         return found
     
@@ -203,7 +212,7 @@ class Schedule:
             events = await self.filter_events(earliest = dt.datetime.now(dt.timezone.utc))
         elif mode == 'all':
             events = await self.filter_events()
-        matched = Schedule.find_event(events, search,-1)
+        matched = Schedule.find_event(events, search, -1, cf.alias)
         messages = Schedule.relstr_event(matched, timezone)
         for msg in messages:
             await self.bot.say(msg)
@@ -215,7 +224,7 @@ class Schedule:
         timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
         now = dt.datetime.now(dt.timezone.utc)
         upcoming = await self.filter_events(earliest = now)
-        matched = Schedule.find_event(upcoming, search.lower(), 1)
+        matched = Schedule.find_event(upcoming, search.lower(), 1, cf.alias)
         
         if len(matched) >= 1:
             msg = Schedule.relstr_event(matched, timezone)[0]
@@ -232,7 +241,7 @@ class Schedule:
         now = dt.datetime.now(dt.timezone.utc)
         upcoming = await self.filter_events(latest = now)
         upcoming.reverse()
-        matched = Schedule.find_event(upcoming, search.lower(), 1)
+        matched = Schedule.find_event(upcoming, search.lower(), 1, cf.alias)
         
         if len(matched) >= 1:
             msg = Schedule.relstr_event(matched, timezone)[0]

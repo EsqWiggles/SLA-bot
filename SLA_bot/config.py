@@ -11,6 +11,9 @@ class Config:
     cal_path = os.path.abspath(os.path.join(__file__, '../../usr/calendar/eq_schedule.ics'))
 
     _user_cf = configparser.ConfigParser(allow_no_value = True)
+    
+    custom_tz={}
+    alias={}
 
     def parse_values(cf):
         Config.token = cf.get('Bot', 'token')
@@ -18,7 +21,12 @@ class Config:
         Config.wkstart_weekday = cf.getint('EQ_Schedule', 'maint_weekday')
         Config.wkstart_time = cf.get('EQ_Schedule', 'maint_time')
         Config.cal_path = cf.get('EQ_Schedule', 'file_path')
-        Config.custom_tz = dict(cf.items('Timezones'))
+        Config.custom_tz.update(cf.items('Timezones'))
+        
+        aliases = cf.items('Alias')
+        for a in aliases:
+            Config.alias[ a[0] ] = a[1].split(',,')
+
         
     def load_config(file_paths):
         for file in file_paths:
