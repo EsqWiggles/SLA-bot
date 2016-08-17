@@ -1,6 +1,8 @@
 import configparser
 import os
-#make config take in a path to a file to load
+
+import pytz
+
 class Config:
 
     #bytes to read at a time from http content
@@ -17,7 +19,7 @@ class Config:
 
     def parse_values(cf):
         Config.token = cf.get('Bot', 'token')
-        Config.tz = cf.get('Bot', 'default_timezone')
+        Config.tz = pytz.timezone(cf.get('Bot', 'default_timezone'))
         Config.wkstart_weekday = cf.getint('EQ_Schedule', 'maint_weekday')
         Config.wkstart_time = cf.get('EQ_Schedule', 'maint_time')
         Config.cal_path = cf.get('EQ_Schedule', 'file_path')

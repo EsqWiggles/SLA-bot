@@ -117,7 +117,7 @@ class Schedule:
     
     async def event_print(self, events, tz=None):
         if tz == None:
-            tz = pytz.timezone(cf.tz)
+            tz = cf.tz
 
         prev_date = None
         msg_chunk = None
@@ -176,8 +176,7 @@ class Schedule:
     
     @commands.command()
     async def eq_print(self, mode='today', tz_str=None):
-        default = pytz.timezone(cf.tz)
-        timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
+        timezone = Schedule.parse_tz(tz_str, cf.tz, cf.custom_tz)
         if timezone == None:
             return
 
@@ -203,8 +202,7 @@ class Schedule:
 
     @commands.command()
     async def find(self, search='', mode='future', tz_str=''):
-        default = pytz.timezone(cf.tz)
-        timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
+        timezone = Schedule.parse_tz(tz_str, cf.tz, cf.custom_tz)
         events = []
         if mode == 'past':
             events = await self.filter_events(latest = dt.datetime.now(dt.timezone.utc))
@@ -220,8 +218,7 @@ class Schedule:
         
     @commands.command()
     async def next(self, search='', tz_str=''):
-        default = pytz.timezone(cf.tz)
-        timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
+        timezone = Schedule.parse_tz(tz_str, cf.tz, cf.custom_tz)
         now = dt.datetime.now(dt.timezone.utc)
         upcoming = await self.filter_events(earliest = now)
         matched = Schedule.find_event(upcoming, search.lower(), 1, cf.alias)
@@ -236,8 +233,7 @@ class Schedule:
         
     @commands.command()
     async def last(self, search='', tz_str=''):
-        default = pytz.timezone(cf.tz)
-        timezone = Schedule.parse_tz(tz_str, default, cf.custom_tz)
+        timezone = Schedule.parse_tz(tz_str, cf.tz, cf.custom_tz)
         now = dt.datetime.now(dt.timezone.utc)
         upcoming = await self.filter_events(latest = now)
         upcoming.reverse()
