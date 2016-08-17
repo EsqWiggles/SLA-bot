@@ -1,3 +1,4 @@
+import asyncio
 import datetime as dt
 
 import pytz
@@ -103,3 +104,31 @@ def parse_tz(tz_str, default_tz=None, custom=None):
         return None
 
     return None
+
+    
+def line_count(message):
+    if type(message) is str:
+        return 1 + message.count('\n')
+    
+    count = 0
+    for m in message:
+        count += line_count(m)
+    return count
+
+
+async def quiet_say(bot, message, max):
+    send_method = bot.say
+    if line_count(message) > max:
+        send_method = bot.whisper
+        
+    async def recur_say(msg):
+        if type(msg) is str:
+            await send_method(msg)
+            return
+
+        for m in msg:
+            await recur_say(m)
+            
+    await recur_say(message)
+
+

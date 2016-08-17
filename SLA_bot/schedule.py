@@ -67,27 +67,32 @@ class Schedule:
             events.append(e)
         return events
     
-    async def event_print(self, events, tz=None):
-        if tz == None:
-            tz = cf.tz
-
+    async def qsay(self, message):
+        await ut.quiet_say(self.bot, message, cf.max_line)
+    
+    def strfschedule(events, tz):
+        event_days=[]
         prev_date = None
-        msg_chunk = None
 
         for e in reversed(events):
             start_time = e.get('dtstart').dt.astimezone(tz)
+            if start_time.date() != prev_date:
+                day_header = start_time.strftime('%A %Y-%m-%d %Z\n')
+                day_header += '================================'
+                event_days.append(day_header)
+                prev_date = start_time.date()
+                
             name = e.get('summary')
             start_str = start_time.strftime('%H:%M:%S')
-            msg = ('\n{0} | {1}'.format(start_str, name))
-            if start_time.date() != prev_date:
-                if msg_chunk != None:
-                    await self.bot.say('```{}```'.format(msg_chunk))
-                msg_chunk = start_time.strftime('%A %Y-%m-%d %Z\n')
-                msg_chunk += '================================'
-                prev_date = start_time.date()
-            msg_chunk += msg
+            single_event = ('\n{0} | {1}'.format(start_str, name))
+            event_days[-1] += single_event
+        return event_days
 
-        await self.bot.say('```{}```'.format(msg_chunk))
+    async def print_schedule(self, events, tz):
+        days = Schedule.strfschedule(events, tz)
+        for i in range(len(days)):
+            days[i] = '```{}```'.format(days[i])
+        await self.qsay(days)
     
     def find_event(events, search='', max=-1, custom=None):
         found = []
@@ -129,8 +134,6 @@ class Schedule:
     @commands.command()
     async def eq_print(self, mode='today', tz_str=None):
         timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
-        if timezone == None:
-            return
 
         today = ut.day(dt.datetime.now(timezone), 0, timezone)
         if mode == 'today':
@@ -150,7 +153,7 @@ class Schedule:
             events = []
             for d in dates:
                 events.extend(await self.filter_events(d, ut.day(d, 1, timezone)))
-        await self.event_print(events, timezone)
+        await self.print_schedule(events, timezone)
 
     @commands.command()
     async def find(self, search='', mode='future', tz_str=''):
@@ -164,8 +167,7 @@ class Schedule:
             events = await self.filter_events()
         matched = Schedule.find_event(events, search, -1, cf.alias)
         messages = Schedule.relstr_event(matched, timezone)
-        for msg in messages:
-            await self.bot.say(msg)
+        await self.qsay(messages)
             
         
     @commands.command()
@@ -180,7 +182,7 @@ class Schedule:
         else:
             msg = 'No scheduled {} found.'.format(search)
 
-        await self.bot.say(msg)
+        await self.qsay(msg)
         
         
     @commands.command()
@@ -196,4 +198,4 @@ class Schedule:
         else:
             msg = 'No scheduled {} found.'.format(search)
 
-        await self.bot.say(msg)
+        await self.qsay(msg)
