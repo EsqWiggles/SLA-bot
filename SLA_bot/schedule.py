@@ -46,63 +46,15 @@ class Schedule:
                         current_events.append(component)
         current_events.sort(key=lambda event: event.get('dtstart').dt)
         self._events = current_events
-    
-    
-    def prev_weekday(weekday, at):
-        curr = dt.datetime.now(dt.timezone.utc)
-        prev = curr.replace(hour=at.hour, minute=at.minute,
-                            second=at.second, microsecond=0)
-        while(prev >= curr or prev.isoweekday() != weekday):
-            prev = prev - dt.timedelta(days=1)
-        return prev
 
     def prev_maint():
         m_time = dt.datetime.strptime(cf.wkstart_time, '%H:%M:%S')
-        return Schedule.prev_weekday(cf.wkstart_weekday, m_time)
+        return ut.prev_weekday(cf.wkstart_weekday, m_time)
     
     async def update(self):
         downloaded = await Schedule.download(cf.cal_url, cf.cal_path)
         if downloaded == True:
             await self.grab_events(cf.cal_path, Schedule.prev_maint())
-            
-    def utctz_offset(offset):
-        h,sep,m = offset.partition(':')
-        h = int(h)
-        sign = 1
-        if h < 0:
-            sign = -1
-        if m == '':
-            m = 0
-        else:
-            m = int(m)
-        m = sign * m
-        utc_tz = dt.timezone(dt.timedelta(hours=h, minutes=m))
-        return utc_tz
-            
-    def parse_tz(tz_str, default_tz=None, custom=None):
-        if tz_str == None or tz_str == '':
-            return default_tz
-        
-        try:
-            return Schedule.utctz_offset(tz_str)
-        except ValueError:
-            pass
-    
-        if custom != None:
-            custom_tz = tz_str.lower()
-            if custom_tz in custom:
-                return pytz.timezone(custom[custom_tz])
-                
-        country_code = tz_str.upper()
-        if country_code in pytz.country_timezones:
-            return pytz.timezone(pytz.country_timezones[country_code][0])
-
-        try:
-            return pytz.timezone(tz_str)
-        except pytz.exceptions.UnknownTimeZoneError:
-            return None
-  
-        return None
     
     async def filter_events(self, earliest=None, latest=None):
         events = []
@@ -176,7 +128,7 @@ class Schedule:
     
     @commands.command()
     async def eq_print(self, mode='today', tz_str=None):
-        timezone = Schedule.parse_tz(tz_str, cf.tz, cf.custom_tz)
+        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         if timezone == None:
             return
 
@@ -202,7 +154,7 @@ class Schedule:
 
     @commands.command()
     async def find(self, search='', mode='future', tz_str=''):
-        timezone = Schedule.parse_tz(tz_str, cf.tz, cf.custom_tz)
+        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         events = []
         if mode == 'past':
             events = await self.filter_events(latest = dt.datetime.now(dt.timezone.utc))
@@ -218,7 +170,7 @@ class Schedule:
         
     @commands.command()
     async def next(self, search='', tz_str=''):
-        timezone = Schedule.parse_tz(tz_str, cf.tz, cf.custom_tz)
+        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         now = dt.datetime.now(dt.timezone.utc)
         upcoming = await self.filter_events(earliest = now)
         matched = Schedule.find_event(upcoming, search.lower(), 1, cf.alias)
@@ -233,7 +185,7 @@ class Schedule:
         
     @commands.command()
     async def last(self, search='', tz_str=''):
-        timezone = Schedule.parse_tz(tz_str, cf.tz, cf.custom_tz)
+        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         now = dt.datetime.now(dt.timezone.utc)
         upcoming = await self.filter_events(latest = now)
         upcoming.reverse()

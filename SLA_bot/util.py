@@ -1,5 +1,7 @@
 import datetime as dt
 
+import pytz
+
 def day(base_dt, offset=0, tz=None):
     if tz == None:
         tz = pytz.utc
@@ -53,3 +55,51 @@ def strfdelta(tdelta, unit_str = ('days', 'hr', 'min', 'sec')):
         if i < last and units[i+1] != 0:
             parts.append('{}{}'.format(units[i+1], unit_str[i+1]))
         return ' '.join(parts)
+        
+        
+def prev_weekday(weekday, at):
+    curr = dt.datetime.now(dt.timezone.utc)
+    prev = curr.replace(hour=at.hour, minute=at.minute,
+                        second=at.second, microsecond=0)
+    while(prev >= curr or prev.isoweekday() != weekday):
+        prev = prev - dt.timedelta(days=1)
+    return prev
+    
+def utctz_offset(offset):
+    h,sep,m = offset.partition(':')
+    h = int(h)
+    sign = 1
+    if h < 0:
+        sign = -1
+    if m == '':
+        m = 0
+    else:
+        m = int(m)
+    m = sign * m
+    utc_tz = dt.timezone(dt.timedelta(hours=h, minutes=m))
+    return utc_tz
+        
+def parse_tz(tz_str, default_tz=None, custom=None):
+    if tz_str == None or tz_str == '':
+        return default_tz
+    
+    try:
+        return utctz_offset(tz_str)
+    except ValueError:
+        pass
+
+    if custom != None:
+        custom_tz = tz_str.lower()
+        if custom_tz in custom:
+            return pytz.timezone(custom[custom_tz])
+            
+    country_code = tz_str.upper()
+    if country_code in pytz.country_timezones:
+        return pytz.timezone(pytz.country_timezones[country_code][0])
+
+    try:
+        return pytz.timezone(tz_str)
+    except pytz.exceptions.UnknownTimeZoneError:
+        return None
+
+    return None
