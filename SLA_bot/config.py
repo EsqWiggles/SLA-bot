@@ -1,4 +1,5 @@
 import configparser
+import datetime as dt
 import os
 
 import pytz
@@ -24,6 +25,9 @@ class Config:
         Config.wkstart_weekday = cf.getint('EQ_Schedule', 'maint_weekday')
         Config.wkstart_time = cf.get('EQ_Schedule', 'maint_time')
         Config.cal_path = cf.get('EQ_Schedule', 'file_path')
+        l_time = cf.getint('EQ_Schedule', 'linked_time')
+        Config.linked_time = dt.timedelta(minutes=l_time)
+        
         Config.custom_tz.update(cf.items('Timezones'))
         
         aliases = cf.items('Alias')

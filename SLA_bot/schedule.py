@@ -94,13 +94,10 @@ class Schedule:
             days[i] = '```{}```'.format(days[i])
         await self.qsay(days)
     
-    def find_event(events, search='', max=-1, custom=None):
+    def find_idx(events, search='', custom=None):
         found = []
-        count = 0
-        for e in events:
-            if count >= max and max != -1:
-                break;
-            
+        search = search.lower()
+        for i in range(len(events)):
             searches = []
             try:
                 searches = custom[search]
@@ -108,11 +105,17 @@ class Schedule:
                 searches.append(search)
 
             for s in searches:
-                if s.lower() in e.get('summary').lower():
-                    found.append(e)
-                    count += 1
+                name = events[i].get('summary')
+                if s.lower() in name.lower():
+                    found.append(i)
                     break;
         return found
+        
+    def eventsfidx(events, indices):
+        new_list = []
+        for i in indices:
+            new_list.append(events[i])
+        return new_list
     
     def relstr_event(events, tz):
         events_str = []
@@ -129,7 +132,18 @@ class Schedule:
                 e_str = '{} ago - **{}** - {}'.format(relative, name, start_str)
             events_str.append(e_str)
         return events_str
-    
+
+
+    def connected(events, idx, timeframe):
+        linked = [events[idx]]
+        for i in range(idx + 1, len(events)):
+            last_start = linked[-1].get('dtstart').dt
+            curr_start = events[i].get('dtstart').dt
+            if abs(curr_start - last_start) > timeframe:
+                break;
+            linked.append(events[i])
+        return linked
+            
     
     @commands.command()
     async def eq_print(self, mode='today', tz_str=None):
@@ -165,8 +179,10 @@ class Schedule:
             events = await self.filter_events(earliest = dt.datetime.now(dt.timezone.utc))
         elif mode == 'all':
             events = await self.filter_events()
-        matched = Schedule.find_event(events, search, -1, cf.alias)
-        messages = Schedule.relstr_event(matched, timezone)
+        
+        matched = Schedule.find_idx(events, search, cf.alias)
+        found = Schedule.eventsfidx(events, matched)
+        messages = Schedule.relstr_event(found, timezone)
         await self.qsay(messages)
             
         
@@ -175,10 +191,11 @@ class Schedule:
         timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         now = dt.datetime.now(dt.timezone.utc)
         upcoming = await self.filter_events(earliest = now)
-        matched = Schedule.find_event(upcoming, search.lower(), 1, cf.alias)
-        
+        matched = Schedule.find_idx(upcoming, search, cf.alias)
+
         if len(matched) >= 1:
-            msg = Schedule.relstr_event(matched, timezone)[0]
+            next = Schedule.connected(upcoming, matched[0], cf.linked_time)
+            msg = Schedule.relstr_event(next, timezone)
         else:
             msg = 'No scheduled {} found.'.format(search)
 
@@ -189,12 +206,12 @@ class Schedule:
     async def last(self, search='', tz_str=''):
         timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         now = dt.datetime.now(dt.timezone.utc)
-        upcoming = await self.filter_events(latest = now)
-        upcoming.reverse()
-        matched = Schedule.find_event(upcoming, search.lower(), 1, cf.alias)
+        passed = await self.filter_events(latest = now)
+        matched = Schedule.find_idx(passed, search, cf.alias)
         
         if len(matched) >= 1:
-            msg = Schedule.relstr_event(matched, timezone)[0]
+            last = Schedule.connected(passed, matched[-1], cf.linked_time)
+            msg = Schedule.relstr_event(last, timezone)
         else:
             msg = 'No scheduled {} found.'.format(search)
 
