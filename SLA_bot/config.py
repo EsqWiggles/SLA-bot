@@ -11,7 +11,8 @@ class Config:
 
     cal_url = 'http://www.google.com/calendar/ical/pso2emgquest%40gmail.com/public/basic.ics'
 
-    cal_path = os.path.abspath(os.path.join(__file__, '../../usr/calendar/eq_schedule.ics'))
+    #set full path from main file
+    cal_path = os.path.join('usr', 'tmp', 'eq_schedule.ics')
 
     _user_cf = configparser.ConfigParser(allow_no_value = True)
     
@@ -24,7 +25,8 @@ class Config:
         Config.max_line = cf.getint('Bot', 'max_line')
         Config.wkstart_weekday = cf.getint('EQ_Schedule', 'maint_weekday')
         Config.wkstart_time = cf.get('EQ_Schedule', 'maint_time')
-        Config.cal_path = cf.get('EQ_Schedule', 'file_path')
+        Config.cal_path = cf.get( 'EQ_Schedule', 'file_path', 
+                                  fallback = Config.cal_path  )
         l_time = cf.getint('EQ_Schedule', 'linked_time')
         Config.linked_time = dt.timedelta(minutes=l_time)
         

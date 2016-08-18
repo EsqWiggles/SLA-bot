@@ -12,6 +12,7 @@ configs = [
     os.path.join(curr_dir, 'docs', 'default_config.ini'),
     os.path.join(curr_dir, 'config.ini')
 ]
+cf.cal_path = os.path.join(curr_dir, cf.cal_path)
 cf.load_config(configs)  
 
 bot = commands.Bot(command_prefix='!', description='test')
