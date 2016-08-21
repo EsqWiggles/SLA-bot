@@ -27,6 +27,9 @@ class Config:
         Config.token = cf.get('Bot', 'token')
         Config.tz = pytz.timezone(cf.get('Bot', 'default_timezone'))
         Config.max_line = cf.getint('Bot', 'max_line')
+        Config.chan_path = cf.get( 'Bot', 'chan_path', 
+                                  fallback = Config.chan_path  )
+                                  
         Config.wkstart_weekday = cf.getint('EQ_Schedule', 'maint_weekday')
         Config.wkstart_time = cf.get('EQ_Schedule', 'maint_time')
         Config.cal_path = cf.get( 'EQ_Schedule', 'file_path', 
