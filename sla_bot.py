@@ -13,6 +13,7 @@ configs = [
     os.path.join(curr_dir, 'config.ini')
 ]
 cf.cal_path = os.path.join(curr_dir, cf.cal_path)
+cf.chan_path = os.path.join(curr_dir, cf.chan_path)
 cf.load_config(configs)  
 
 bot = commands.Bot(command_prefix='!', description='test')
@@ -32,6 +33,12 @@ async def on_ready():
 async def test():
     await bot.say('Hello World!')
 
-
+@bot.command(pass_context=True, no_pm=True)
+async def announce(ctx, filters=''):
+    perm = ctx.message.channel.permissions_for(ctx.message.author)
+    id = ctx.message.channel.id
+    if perm.manage_channels:
+        cf.set_chan(id, filters)
+    
  
 bot.run(cf.token)

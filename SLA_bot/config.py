@@ -4,6 +4,8 @@ import os
 
 import pytz
 
+from SLA_bot.chanconfig import ChanConfig
+
 class Config:
 
     #bytes to read at a time from http content
@@ -13,8 +15,10 @@ class Config:
 
     #set full path from main file
     cal_path = os.path.join('usr', 'tmp', 'eq_schedule.ics')
-
+    chan_path = os.path.join('usr', 'channels.ini')
+    
     _user_cf = configparser.ConfigParser(allow_no_value = True)
+    _chan_config = ChanConfig()
     
     custom_tz={}
     alias={}
@@ -35,7 +39,9 @@ class Config:
         aliases = cf.items('Alias')
         for a in aliases:
             Config.alias[ a[0] ] = a[1].split(',,')
-
+            
+        Config._chan_config.read(Config.chan_path)
+        Config.channels = Config._chan_config.parse()
         
     def load_config(file_paths):
         for file in file_paths:
@@ -45,6 +51,17 @@ class Config:
     def dump_config(path):
         with open(path, "w") as config_file:
             Config._user_cf.write(config_file)
-
-    
+            
+    def set_chan(id, filters):
+        Config._chan_config.read(Config.chan_path)
+        Config._chan_config.set(id, filters)
+        Config._chan_config.write(Config.chan_path)
+        Config.channels = Config._chan_config.parse()
+        
+    def delete_chans(ids):
+        _chan_config.read(chan_path)
+        for i in ids:
+            _chan_config.delete(i)
+        _chan_config.write(chan_path)
+        Config.channels = _chan_config.parse()
 
