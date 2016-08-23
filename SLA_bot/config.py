@@ -29,6 +29,10 @@ class Config:
         Config.max_line = cf.getint('Bot', 'max_line')
         Config.chan_path = cf.get( 'Bot', 'chan_path', 
                                   fallback = Config.chan_path  )
+        a_before = cf.getint('Bot', 'alert_before')
+        Config.alert_before = dt.timedelta(minutes = a_before)
+        a_every = cf.getint('Bot', 'alert_every')
+        Config.alert_every = dt.timedelta(minutes = a_every)
                                   
         Config.wkstart_weekday = cf.getint('EQ_Schedule', 'maint_weekday')
         Config.wkstart_time = cf.get('EQ_Schedule', 'maint_time')
