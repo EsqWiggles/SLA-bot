@@ -49,39 +49,25 @@ async def announce(ctx, filters='1,2,3,4,5,6,7,8,9,10'):
     if perm.manage_channels:
         cf.set_chan(id, filters)
 
-        
-# async def alertable(schedule, timeframe, last_alert):
-    # now = dt.datetime.now(dt.timezone.utc)
-    # latest = now + timeframe + dt.timedelta(minutes = 1)
-    # upcoming = await schedule.filter_events(last_alert, latest)
-    # return upcoming
 
 def alert_text(event, ref_time):
-    name = event.get('summary')
-    start = event.get('dtstart').dt
-    start_str = start.astimezone(cf.tz).strftime('%b %d   %H:%M %Z')
-    time_left = math.ceil((start - ref_time).total_seconds() / 60)
-    return '[{}min] - **{}** - {}'.format(time_left, name, start_str)
+    time_left = math.ceil((event.start - ref_time).total_seconds() / 60)
+    return '[{}min] - {}'.format(time_left, event.duration(cf.tz))
     
 async def alert(id, event, first_resend, resend_time):
     channel = bot.get_channel(id)
-    name = event.get('summary')
-    start = event.get('dtstart').dt
     now = dt.datetime.now(dt.timezone.utc)
     resend = first_resend
     message = None
 
-    while now < start:
+    while now < event.start:
         now = dt.datetime.now(dt.timezone.utc)
         alert_msg = alert_text(event, now)
-        print('now: {}'.format(now))
-        print('resend: {}'.format(resend))
         if now >= resend:
             try:
                 await bot.delete_message(message)
                 resend = resend + resend_time
                 message = None
-                print('deleted!')
             except discord.errors.HTTPException:
                 continue
         if message == None:
@@ -100,8 +86,7 @@ async def alert(id, event, first_resend, resend_time):
         await asyncio.sleep(60)
     if message != None:
         try:
-            start_str = start.astimezone(cf.tz).strftime('%b %d   %H:%M %Z')
-            alert_msg = '[Started] - **{}** - {}'.format(name, start_str)
+            alert_msg = '[Started] - {}'.format(event.duration(cf.tz))
             message = await bot.edit_message(message, alert_msg)
         except discord.errors.HTTPException:
             pass
@@ -110,15 +95,12 @@ async def alert(id, event, first_resend, resend_time):
 async def make_alert():
     await bot.wait_until_ready()
     last_alert =  dt.datetime.now(dt.timezone.utc)
-    last_alert +- dt.timedelta(hours=2)
     while not bot.is_closed:
         now = dt.datetime.now(dt.timezone.utc)
         alert_time = now + cf.alert_before
         alertable = await event_schedule.filter_events(last_alert, alert_time)
-
         for event in alertable:
-            start = event.get('dtstart').dt
-            first_resend = start
+            first_resend = event.start
             while first_resend > now:
                 first_resend -= cf.alert_every
             first_resend += cf.alert_every

@@ -10,6 +10,7 @@ import icalendar as ical
 import pytz
 
 from   SLA_bot.config import Config as cf
+from   SLA_bot.gameevent import GameEvent
 import SLA_bot.util as ut
 
 class Schedule:
@@ -35,16 +36,16 @@ class Schedule:
                 print('File could not be downloaded. Recieved HTTP code {} {}'.format(response.status, response.reason), file=sys.stderr)
         return False
                 
-    async def grab_events(self, cal_path, from_dt, to_dt=None):
+    async def grab_events(self, cal_path, from_dt):
         current_events = []
         with open(cal_path, 'rb') as cal_file:
             gcal = ical.Calendar.from_ical(cal_file.read())
             for component in gcal.walk():
                 if component.name == "VEVENT":
                     start_dt = component.get('dtstart').dt
-                    if start_dt >= from_dt and (to_dt == None or start_dt <= to_dt):
-                        current_events.append(component)
-        current_events.sort(key=lambda event: event.get('dtstart').dt)
+                    if start_dt >= from_dt:
+                        current_events.append(GameEvent.from_ical(component))
+        current_events.sort(key=lambda event: event.start)
         self._events = current_events
 
     def prev_maint():
@@ -59,10 +60,9 @@ class Schedule:
     async def filter_events(self, earliest=None, latest=None):
         events = []
         for e in self._events:
-            start_time = e.get('dtstart').dt
-            if earliest != None and start_time < earliest:
+            if earliest != None and e.start < earliest:
                  continue
-            if latest != None and start_time >= latest :
+            if latest != None and e.start >= latest :
                  continue
             events.append(e)
         return events
@@ -75,16 +75,15 @@ class Schedule:
         prev_date = None
 
         for e in reversed(events):
-            start_time = e.get('dtstart').dt.astimezone(tz)
+            start_time = e.start.astimezone(tz)
             if start_time.date() != prev_date:
                 day_header = start_time.strftime('%A %Y-%m-%d %Z\n')
                 day_header += '================================'
                 event_days.append(day_header)
                 prev_date = start_time.date()
                 
-            name = e.get('summary')
             start_str = start_time.strftime('%H:%M:%S')
-            single_event = ('\n{0} | {1}'.format(start_str, name))
+            single_event = ('\n{0} | {1}'.format(start_str, e.name))
             event_days[-1] += single_event
         return event_days
 
@@ -105,8 +104,7 @@ class Schedule:
                 searches.append(search)
 
             for s in searches:
-                name = events[i].get('summary')
-                if s.lower() in name.lower():
+                if s.lower() in events[i].name.lower():
                     found.append(i)
                     break;
         return found
@@ -116,20 +114,17 @@ class Schedule:
         for i in indices:
             new_list.append(events[i])
         return new_list
-    
+
     def relstr_event(events, tz):
         events_str = []
         now = dt.datetime.now(dt.timezone.utc)
         for e in events:
-            name = e.get('summary')
-            start = e.get('dtstart').dt
-            start_str = start.astimezone(tz).strftime('%b %d   %H:%M %Z')
-            diff = start - now
+            diff = e.start - now
             relative = ut.strfdelta(abs(diff))
             if diff >= dt.timedelta(0):
-                e_str = 'In {} - **{}** - {}'.format(relative, name, start_str)
+                e_str = 'In {} - {}'.format(relative, e.duration(tz))
             else:
-                e_str = '{} ago - **{}** - {}'.format(relative, name, start_str)
+                e_str = '{} ago - {}'.format(relative, e.duration(tz))
             events_str.append(e_str)
         return events_str
 
@@ -137,8 +132,8 @@ class Schedule:
     def connected(events, idx, timeframe):
         linked = [events[idx]]
         for i in range(idx + 1, len(events)):
-            last_start = linked[-1].get('dtstart').dt
-            curr_start = events[i].get('dtstart').dt
+            last_start = linked[-1].start
+            curr_start = events[i].start
             if abs(curr_start - last_start) > timeframe:
                 break;
             linked.append(events[i])
