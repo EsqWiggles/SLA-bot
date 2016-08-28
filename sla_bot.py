@@ -98,7 +98,7 @@ async def make_alert():
     while not bot.is_closed:
         now = dt.datetime.now(dt.timezone.utc)
         alert_time = now + cf.alert_before
-        alertable = await event_schedule.filter_events(last_alert, alert_time)
+        alertable = event_schedule.from_range(last_alert, alert_time)
         for event in alertable:
             first_resend = event.start
             while first_resend > now:
@@ -114,3 +114,5 @@ async def make_alert():
 
         
 bot.run(cf.token)
+
+
