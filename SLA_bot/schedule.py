@@ -90,9 +90,9 @@ class Schedule:
     def find_idx(self, search='', custom=None):
         found = []
         try:
-            searches = custom[search]
+            searches = custom[search.lower()]
         except (KeyError, TypeError):
-            searches = [search]
+            searches = [search.lower()]
 
         for s in searches:
             found.extend(self.edir.find(s))
