@@ -178,46 +178,38 @@ class Schedule:
     @commands.command()
     async def next(self, search='', tz_str=''):
         timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
-        msg = 'No more scheduled events found.'
-        
-        
-        next_idx = self.edir.next
-        if search != '':
+        if search == '':
+            next_idx = self.edir.next
+        else:
             found = self.find_idx(search, cf.alias)
             found = [x for x in found if x >= self.edir.next]
             try:
                 next_idx = found[0]
             except IndexError:
                 next_idx = self.edir.end
-        
-        if next_idx < self.edir.end:
+        if next_idx == self.edir.end:
+            msg = 'No scheduled {} found.'.format(search or 'events')
+        else:
             events = Schedule.connected(self.edir.events, next_idx, cf.linked_time)
             msg = Schedule.relstr_event(events, timezone)
-        else:
-            if search != '':
-                msg = 'No scheduled {} found.'.format(search)
         await self.qsay(msg)
-        
-        
+
     @commands.command()
     async def last(self, search='', tz_str=''):
         timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
-        msg = 'No more scheduled events found.'
-        
-        last_idx = self.edir.last
-        if search != '':
+        if search == '':
+            last_idx = self.edir.last
+        else:
             found = self.find_idx(search, cf.alias)
-            found = [x for x in found if x <= last_idx]
+            found = [x for x in found if x < self.edir.next]
             try:
                 last_idx = found[-1]
             except IndexError:
                 last_idx = self.edir.end
-                
-        if last_idx < self.edir.end:
+        if last_idx == self.edir.end:
+            msg = 'No old scheduled {} found.'.format(search or 'events')
+        else:
             events = Schedule.connected(self.edir.events, last_idx, cf.linked_time)
             msg = Schedule.relstr_event(events, timezone)
-        else:
-            if search != '':
-                msg = 'No scheduled {} found.'.format(search)
         await self.qsay(msg)
 

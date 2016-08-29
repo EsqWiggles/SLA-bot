@@ -44,7 +44,8 @@ class EventDir:
         
     @property
     def last(self):
-        return self.next - 1
+        n = self.next
+        return n - 1 if n > 0 else self.end
 
     def indexfdt(self, some_dt):
         try:
