@@ -159,22 +159,14 @@ class Schedule:
         await self.print_schedule(events, timezone)
 
     @commands.command()
-    async def find(self, search='', mode='future', tz_str=''):
+    async def future(self, search='', tz_str=''):
         timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         matched = self.find_idx(search, cf.alias)
-        after_maint = self.edir.rangefdt(start = Schedule.prev_maint())[0]
-        if mode == 'past':
-            matched = [x for x in matched if x >= after_maint and x < self.edir.next]
-        elif mode == 'future':
-            matched = [x for x in matched if x >= self.edir.next]
-        elif mode == 'all':
-            matched = [x for x in matched if x >= after_maint]
-        
-        found = Schedule.eventsfidx(self.edir.events, matched)
+        upcoming = [x for x in matched if x >= self.edir.next]
+        found = Schedule.eventsfidx(self.edir.events, upcoming)
         messages = Schedule.relstr_event(found, timezone)
         await self.qsay(messages)
             
-        
     @commands.command()
     async def next(self, search='', tz_str=''):
         timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
