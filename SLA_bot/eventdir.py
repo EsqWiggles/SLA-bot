@@ -73,4 +73,18 @@ class EventDir:
         found.sort()
         return found
 
-
+    def connected(self, idx, timeframe):
+        linked = [self.events[idx]]
+        for i in range(idx + 1, self.end):
+            last_start = linked[-1].start
+            curr_start = self.events[i].start
+            if abs(curr_start - last_start) > timeframe:
+                break;
+            linked.append(self.events[i])
+        return linked
+        
+    def eventsfidx(self, indices):
+        new_list = []
+        for i in indices:
+            new_list.append(self.events[i])
+        return new_list

@@ -100,12 +100,6 @@ class Schedule:
         found.sort()
         return found
         
-    def eventsfidx(events, indices):
-        new_list = []
-        for i in indices:
-            new_list.append(events[i])
-        return new_list
-
     def relstr_event(events, tz):
         events_str = []
         now = dt.datetime.now(dt.timezone.utc)
@@ -118,17 +112,6 @@ class Schedule:
                 e_str = '{} ago - {}'.format(relative, e.duration(tz))
             events_str.append(e_str)
         return events_str
-
-
-    def connected(events, idx, timeframe):
-        linked = [events[idx]]
-        for i in range(idx + 1, len(events)):
-            last_start = linked[-1].start
-            curr_start = events[i].start
-            if abs(curr_start - last_start) > timeframe:
-                break;
-            linked.append(events[i])
-        return linked
 
     @commands.command()
     async def print(self, mode='today', tz_str=None):
@@ -162,7 +145,7 @@ class Schedule:
         timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         matched = self.find_idx(search, cf.alias)
         upcoming = [x for x in matched if x >= self.edir.next]
-        found = Schedule.eventsfidx(self.edir.events, upcoming)
+        found = self.edir.eventsfidx(upcoming)
         messages = Schedule.relstr_event(found, timezone)
         await self.qsay(messages)
             
@@ -181,7 +164,7 @@ class Schedule:
         if next_idx == self.edir.end:
             msg = 'No scheduled {} found.'.format(search or 'events')
         else:
-            events = Schedule.connected(self.edir.events, next_idx, cf.linked_time)
+            events = self.edir.connected(next_idx, cf.linked_time)
             msg = Schedule.relstr_event(events, timezone)
         await self.qsay(msg)
 
@@ -200,7 +183,7 @@ class Schedule:
         if last_idx == self.edir.end:
             msg = 'No old scheduled {} found.'.format(search or 'events')
         else:
-            events = Schedule.connected(self.edir.events, last_idx, cf.linked_time)
+            events = self.edir.connected(last_idx, cf.linked_time)
             msg = Schedule.relstr_event(events, timezone)
         await self.qsay(msg)
 
