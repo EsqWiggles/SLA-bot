@@ -64,11 +64,11 @@ class Schedule:
     async def qsay(self, message):
         await ut.quiet_say(self.bot, message, cf.max_line)
     
-    def strfschedule(events, tz):
+    def strfschedule(self, events, tz):
         event_days=[]
         prev_date = None
-
-        for e in reversed(events):
+        next_time = self.edir.events[self.edir.next].start
+        for e in events:
             start_time = e.start.astimezone(tz)
             if start_time.date() != prev_date:
                 day_header = start_time.strftime('%A %Y-%m-%d %Z\n')
@@ -76,13 +76,14 @@ class Schedule:
                 event_days.append(day_header)
                 prev_date = start_time.date()
                 
-            start_str = start_time.strftime('%H:%M:%S')
-            single_event = ('\n{0} | {1}'.format(start_str, e.name))
+            start_str = start_time.strftime('%H:%M')
+            prefix = '-> ' if e.start == next_time else '   '
+            single_event = ('\n{}{} | {}'.format(prefix, start_str, e.name))
             event_days[-1] += single_event
         return event_days
 
     async def print_schedule(self, events, tz):
-        days = Schedule.strfschedule(events, tz)
+        days = self.strfschedule(events, tz)
         for i in range(len(days)):
             days[i] = '```{}```'.format(days[i])
         await self.qsay(days)
