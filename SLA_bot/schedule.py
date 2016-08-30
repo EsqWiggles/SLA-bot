@@ -129,26 +129,25 @@ class Schedule:
                 break;
             linked.append(events[i])
         return linked
-            
-    
-    @commands.command()
-    async def eq_print(self, mode='today', tz_str=None):
-        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
 
+    @commands.command()
+    async def print(self, mode='today', tz_str=None):
+        mode = mode.lower()
+        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
         today = ut.day(dt.datetime.now(timezone), 0, timezone)
-        maint_time = Schedule.prev_maint()
+        yesterday = ut.day(today, -1, timezone)
+        tomorrow = ut.day(today, 1, timezone)
+        day_after = ut.day(today, 2, timezone)
         if mode == 'today':
-            events = self.from_range(today, ut.day(today, 1, timezone))
+            events = self.from_range(today, tomorrow)
         elif mode == 'yesterday':
-            events = self.from_range(ut.day(today, -1, timezone), today)
+            events = self.from_range(yesterday, today)
         elif mode == 'tomorrow':
-            events = self.from_range(ut.day(today, 1, timezone), ut.day(today, 2, timezone))
-        elif mode == 'past':
-            events = self.from_range(maint_time, dt.datetime.now(dt.timezone.utc))
+            events = self.from_range(tomorrow, day_after)
         elif mode == 'future':
             events = self.from_range(earliest = dt.datetime.now(dt.timezone.utc))
-        elif mode == 'all':
-            events = self.from_range(maint_time, dt.datetime.now(dt.timezone.utc))
+        elif mode == 'week':
+            events = self.from_range(earliest = Schedule.prev_maint())
         else:
             events = []
             dates = ut.parse_md(mode, timezone)
