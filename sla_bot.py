@@ -24,6 +24,15 @@ cf.load_config(configs)
 
 
 bot = commands.Bot(command_prefix='!', description='test')
+event_schedule = Schedule(bot)
+bot.add_cog(event_schedule)
+
+async def update_schedule():
+    while not bot.is_closed:
+        await event_schedule.update()
+        await asyncio.sleep(cf.refresh_time)
+        
+bot.loop.create_task(update_schedule())
 
 @bot.event
 async def on_ready():
@@ -31,11 +40,7 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    
-    global event_schedule
-    event_schedule = Schedule(bot)
-    await event_schedule.update()
-    bot.add_cog(event_schedule)
+
     #bot.loop.create_task(make_alert())
     
 @bot.command()

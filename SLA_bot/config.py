@@ -40,6 +40,7 @@ class Config:
                                   fallback = Config.cal_path  )
         l_time = cf.getint('EQ_Schedule', 'linked_time')
         Config.linked_time = dt.timedelta(minutes=l_time)
+        Config.refresh_time = cf.getint('EQ_Schedule', 'refresh_time')
         
         Config.custom_tz.update(cf.items('Timezones'))
         
