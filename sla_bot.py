@@ -7,9 +7,10 @@ import traceback
 import discord
 from   discord.ext import commands
 
-
 from SLA_bot.config import Config as cf
 from SLA_bot.schedule import Schedule
+
+VERSION = 0.10
 
 curr_dir = os.path.dirname(__file__)
 configs = [
