@@ -36,16 +36,9 @@ bot.loop.create_task(update_schedule())
 
 @bot.event
 async def on_ready():
-    print('Logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
+    print('Logged in as: {}'.format(bot.user.name))
     print('------')
-
     #bot.loop.create_task(make_alert())
-    
-@bot.command()
-async def test():
-    await bot.say('Hello World!')
 
 @bot.command(pass_context=True, no_pm=True)
 async def announce(ctx, filters='1,2,3,4,5,6,7,8,9,10'):
