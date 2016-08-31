@@ -36,7 +36,7 @@ async def on_ready():
     event_schedule = Schedule(bot)
     await event_schedule.update()
     bot.add_cog(event_schedule)
-    bot.loop.create_task(make_alert())
+    #bot.loop.create_task(make_alert())
     
 @bot.command()
 async def test():
