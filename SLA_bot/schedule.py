@@ -67,7 +67,10 @@ class Schedule:
     def strfschedule(self, events, tz):
         event_days=[]
         prev_date = None
-        next_time = self.edir.events[self.edir.next].start
+        try:
+            next_time = self.edir.events[self.edir.next].start
+        except IndexError:
+            next_time = dt.datetime.now(dt.timezone.utc)
         for e in events:
             start_time = e.start.astimezone(tz)
             if start_time.date() != prev_date:
@@ -134,7 +137,7 @@ class Schedule:
             events = self.from_range(earliest = Schedule.prev_maint())
         else:
             events = []
-            dates = ut.parse_md(mode, timezone)
+            dates = ut.parse_date(mode, timezone)
             for d in reversed(dates):
                 events = self.from_range(d, ut.day(d, 1, timezone))
                 if len(events) > 0:

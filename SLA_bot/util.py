@@ -16,25 +16,69 @@ def day(base_dt, offset=0, tz=None):
     else:
         local_dt = local_dt.replace(tzinfo=tz)
     return local_dt.astimezone(dt.timezone.utc)
-    
-def parse_md(md_str, tz):
-    y = dt.datetime.now(tz).year
-    date = '{}/{}'.format(y, md_str)
-    
-    curr = dt.datetime.strptime(date, '%Y/%m/%d')
-    if hasattr(tz, 'localize'):
-        curr = tz.localize(curr)
-    else:
-        curr = curr.replace(tzinfo=tz)
 
+def guess_year(some_date, tz):
+    y = dt.datetime.now(tz).year
+    m = some_date.month
+    d = some_date.day
+    guess_dates = []
+    for offset in range(-1, 2):
+        try: 
+            new_date = dt.date(y+offset, m, d)
+        except ValueError:
+            continue
+        guess_dates.append(new_date)
+    return guess_dates
+
+def guess_month(some_date, tz):
+    y = some_date.year
+    m = dt.datetime.now(tz).month
+    d = some_date.day
+    guess_dates = []
+    for offset in range(-1, 2):
+        new_m = ((m+offset-1)%12)+1
+        try: 
+            new_date = dt.date(y, new_m, d)
+        except ValueError:
+            continue
+        guess_dates.append(new_date)
+    return guess_dates
+
+def parse_date(date_str, tz):
+    now = dt.datetime.now(tz)
+    y, m, d = '', '', ''
+    try:
+        y, m, d = date_str.split('/')
+    except ValueError:
+        try:
+            m, d = date_str.split('/')
+        except ValueError:
+            d = date_str
+            
+    yr = int(y or now.year)
+    mn = int(m or now.month)
+    dy = int(d or now.day)
+    base_date = dt.date(yr, mn, dy)
+    
+    guess = [base_date]
+    if(m == '' and date_str != ''):
+        guess = guess_month(base_date, tz)
+        
+    if(y == '' and date_str != ''):
+        months = guess
+        guess = []
+        for m in months:
+            guess.extend(guess_year(m, tz))
+            
     guess_dt = []
-    if curr.year > dt.MINYEAR:
-        prev = curr.replace(year=curr.year-1)
-        guess_dt.append(day(prev, 0, tz))
-    guess_dt.append(day(curr, 0, tz))
-    if curr.year < dt.MAXYEAR:
-        next = curr.replace(year=curr.year+1)
-        guess_dt.append(day(next, 0, tz))
+    for g in guess:
+        new_dt = dt.datetime(g.year, g.month, g.day)
+        if hasattr(tz, 'localize'):
+            new_dt = tz.localize(new_dt)
+        else:
+            new_dt = new_dt.replace(tzinfo=tz)
+        guess_dt.append(new_dt)
+    guess_dt.sort()
     return guess_dt
     
 def unitsfdelta(tdelta):
