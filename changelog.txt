@@ -1,0 +1,12 @@
+v0.11 @ 2016-09-03
+    - Help messages for the bot and commands.
+    - Future command now limits the results when no search is provided to
+      prevent the bot from flooding the user's PM box.
+    - Announce command is disabled for now
+    - The command prefix by default is now ";" instead of "!'
+    - Config file changes:
+        - Added "cmd_prefix"
+        - Added "find_default"
+
+v0.10 @ 2016-08-30
+    Initial alpha release
