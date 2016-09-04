@@ -9,12 +9,16 @@ from   discord.ext import commands
 import icalendar as ical
 import pytz
 
+import SLA_bot.constants as cs
 from   SLA_bot.config import Config as cf
 from   SLA_bot.eventdir import EventDir
 from   SLA_bot.gameevent import GameEvent
 import SLA_bot.util as ut
 
 class Schedule:
+    """Provides methods to find and print scheduled events.
+    None of these commands will display unscheduled events!
+    """
     def __init__(self, bot):
         self._events = []
         self.bot = bot
@@ -117,45 +121,45 @@ class Schedule:
             events_str.append(e_str)
         return events_str
 
-    @commands.command()
-    async def print(self, mode='today', tz_str=None):
-        mode = mode.lower()
-        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
-        today = ut.day(dt.datetime.now(timezone), 0, timezone)
-        yesterday = ut.day(today, -1, timezone)
-        tomorrow = ut.day(today, 1, timezone)
-        day_after = ut.day(today, 2, timezone)
-        if mode == 'today':
+    @commands.command(help = cs.PRINT_HELP)
+    async def print(self, date='today', timezone=''):
+        date = date.lower()
+        tz = ut.parse_tz(timezone, cf.tz, cf.custom_tz)
+        today = ut.day(dt.datetime.now(timezone), 0, tz)
+        yesterday = ut.day(today, -1, tz)
+        tomorrow = ut.day(today, 1, tz)
+        day_after = ut.day(today, 2, tz)
+        if date == 'today':
             events = self.from_range(today, tomorrow)
-        elif mode == 'yesterday':
+        elif date == 'yesterday':
             events = self.from_range(yesterday, today)
-        elif mode == 'tomorrow':
+        elif date == 'tomorrow':
             events = self.from_range(tomorrow, day_after)
-        elif mode == 'future':
+        elif date == 'future':
             events = self.from_range(earliest = dt.datetime.now(dt.timezone.utc))
-        elif mode == 'week':
+        elif date == 'week':
             events = self.from_range(earliest = Schedule.prev_maint())
         else:
             events = []
-            dates = ut.parse_date(mode, timezone)
+            dates = ut.parse_date(date, tz)
             for d in reversed(dates):
-                events = self.from_range(d, ut.day(d, 1, timezone))
+                events = self.from_range(d, ut.day(d, 1, tz))
                 if len(events) > 0:
                     break
-        await self.print_schedule(events, timezone)
+        await self.print_schedule(events, tz)
 
-    @commands.command()
-    async def future(self, search='', tz_str=''):
-        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
+    @commands.command(help = cs.FUTURE_HELP)
+    async def future(self, search='', timezone=''):
+        tz = ut.parse_tz(timezone, cf.tz, cf.custom_tz)
         matched = self.find_idx(search, cf.alias)
         upcoming = [x for x in matched if x >= self.edir.next]
         found = self.edir.eventsfidx(upcoming)
-        messages = Schedule.relstr_event(found, timezone)
+        messages = Schedule.relstr_event(found, tz)
         await self.qsay(messages)
             
-    @commands.command()
-    async def next(self, search='', tz_str=''):
-        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
+    @commands.command(help = cs.NEXT_HELP)
+    async def next(self, search='', timezone=''):
+        tz = ut.parse_tz(timezone, cf.tz, cf.custom_tz)
         if search == '':
             next_idx = self.edir.next
         else:
@@ -169,12 +173,12 @@ class Schedule:
             msg = 'No scheduled {} found.'.format(search or 'events')
         else:
             events = self.edir.connected(next_idx, cf.linked_time)
-            msg = Schedule.relstr_event(events, timezone)
+            msg = Schedule.relstr_event(events, tz)
         await self.qsay(msg)
 
-    @commands.command()
-    async def last(self, search='', tz_str=''):
-        timezone = ut.parse_tz(tz_str, cf.tz, cf.custom_tz)
+    @commands.command(help = cs.LAST_HELP)
+    async def last(self, search='', timezone=''):
+        tz = ut.parse_tz(timezone, cf.tz, cf.custom_tz)
         if search == '':
             last_idx = self.edir.last
         else:
@@ -188,6 +192,6 @@ class Schedule:
             msg = 'No old scheduled {} found.'.format(search or 'events')
         else:
             events = self.edir.connected(last_idx, cf.linked_time)
-            msg = Schedule.relstr_event(events, timezone)
+            msg = Schedule.relstr_event(events, tz)
         await self.qsay(msg)
 
