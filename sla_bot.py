@@ -7,8 +7,9 @@ import traceback
 import discord
 from   discord.ext import commands
 
-from SLA_bot.config import Config as cf
-from SLA_bot.schedule import Schedule
+from   SLA_bot.config import Config as cf
+import SLA_bot.constants as cs
+from   SLA_bot.schedule import Schedule
 
 VERSION = 0.10
 
@@ -25,7 +26,7 @@ cf.load_config(configs)
 
 
 bot = commands.Bot(command_prefix=cf.cmd_prefix, pm_help = True,
-                   description='test')
+                   description=cs.BOT_HELP)
 event_schedule = Schedule(bot)
 bot.add_cog(event_schedule)
 

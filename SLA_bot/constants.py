@@ -1,3 +1,8 @@
+BOT_HELP = '''A bot for displaying Phantasy Star Online 2 events.
+
+This bot is currently at a very basic level.
+There are still some usability issues like choosing time zones.
+Announcements for scheduled and unscheduled events are planned.'''
 
 FUTURE_HELP = '''Find future scheduled events by name.
 Future takes in two options, "search" and "timezone" in this order.
