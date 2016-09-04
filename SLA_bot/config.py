@@ -25,6 +25,7 @@ class Config:
 
     def parse_values(cf):
         Config.token = cf.get('Bot', 'token')
+        Config.cmd_prefix = cf.get('Bot', 'cmd_prefix')
         Config.tz = pytz.timezone(cf.get('Bot', 'default_timezone'))
         Config.max_line = cf.getint('Bot', 'max_line')
         Config.chan_path = cf.get( 'Bot', 'chan_path', 

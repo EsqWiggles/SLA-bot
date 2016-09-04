@@ -24,7 +24,7 @@ cf.load_config(configs)
 
 
 
-bot = commands.Bot(command_prefix='!', description='test')
+bot = commands.Bot(command_prefix=cf.cmd_prefix, description='test')
 event_schedule = Schedule(bot)
 bot.add_cog(event_schedule)
 
