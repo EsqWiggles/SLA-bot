@@ -43,7 +43,7 @@ async def on_ready():
     print('------')
     #bot.loop.create_task(make_alert())
 
-@bot.command(pass_context=True, no_pm=True)
+@bot.command(pass_context=True, no_pm=True, hidden=True, enabled=False)
 async def announce(ctx, filters='1,2,3,4,5,6,7,8,9,10'):
     perm = ctx.message.channel.permissions_for(ctx.message.author)
     id = ctx.message.channel.id
