@@ -41,6 +41,7 @@ class Config:
         l_time = cf.getint('EQ_Schedule', 'linked_time')
         Config.linked_time = dt.timedelta(minutes=l_time)
         Config.refresh_time = cf.getint('EQ_Schedule', 'refresh_time')
+        Config.find_default = cf.getint('EQ_Schedule', 'find_default')
         
         Config.custom_tz.update(cf.items('Timezones'))
         

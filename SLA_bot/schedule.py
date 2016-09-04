@@ -151,8 +151,13 @@ class Schedule:
     @commands.command(help = cs.FUTURE_HELP)
     async def future(self, search='', timezone=''):
         tz = ut.parse_tz(timezone, cf.tz, cf.custom_tz)
-        matched = self.find_idx(search, cf.alias)
-        upcoming = [x for x in matched if x >= self.edir.next]
+        if search == '':
+            start = self.edir.next
+            end = start + cf.find_default
+            upcoming = range(start, end) 
+        else:
+            matched = self.find_idx(search, cf.alias)
+            upcoming = [x for x in matched if x >= self.edir.next]
         found = self.edir.eventsfidx(upcoming)
         messages = Schedule.relstr_event(found, tz)
         await self.qsay(messages)
