@@ -125,7 +125,7 @@ class Schedule:
     async def print(self, date='today', timezone=''):
         date = date.lower()
         tz = ut.parse_tz(timezone, cf.tz, cf.custom_tz)
-        today = ut.day(dt.datetime.now(timezone), 0, tz)
+        today = ut.day(dt.datetime.now(tz), 0, tz)
         yesterday = ut.day(today, -1, tz)
         tomorrow = ut.day(today, 1, tz)
         day_after = ut.day(today, 2, tz)

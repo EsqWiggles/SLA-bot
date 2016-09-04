@@ -1,3 +1,6 @@
+v0.12 @ 2016-09-04
+    - Fix bug causing "print" command to not work.
+
 v0.11 @ 2016-09-03
     - Help messages for the bot and commands.
     - Future command now limits the results when no search is provided to
