@@ -25,12 +25,24 @@ class AlertChan:
             self.events.append(e)
         self.events.sort(key=lambda event: event.start, reverse=True)
     
+    def align_body(text):
+        lines = text.split('\n')
+        header = lines[0]
+        body = []
+        for line in lines[1:]:
+            body.append('`| {: >6} |` {}'.format('', line))
+        return header + '\n' + '\n'.join(body)
+        
+        
+    
     def alert_text(self, events, ref_time):
         lines = []
         for e in events:
             time_left = math.ceil((e.start - ref_time).total_seconds() / 60)
             if hasattr(e, 'multi_dur'):
                 text = e.multi_dur(self.targets, cf.tz)
+                if e.unscheduled:
+                    text = AlertChan.align_body(text)
             else:
                 text = e.duration(cf.tz)
                 
@@ -137,7 +149,6 @@ class AlertSystem:
         
     async def update(self):
         last_update = None
-        force = True
         while not self.bot.is_closed:
             new_events = []
             unscheduled = [x for x in self.from_feed() if x.unscheduled]

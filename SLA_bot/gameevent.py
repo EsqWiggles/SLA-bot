@@ -40,7 +40,7 @@ class MultiShipEvent(GameEvent):
         
         ship_events = []
         for index in targets:
-            line = '`ship {:02d}: `{}'.format(index, self.ships[index])
+            line = '`ship {:02d}:`{}'.format(index, self.ships[index])
             ship_events.append(line)
         if len(ship_events) < 1:
             return ''
