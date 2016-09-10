@@ -65,28 +65,34 @@ class AlertChan:
 
         now = dt.datetime.now(dt.timezone.utc)
         passed, upcoming = [], []
-        send_new = False if self.message else True
-        
         for e in self.events:
             if e.start > now:
                 upcoming.append(e)
-                if self.last_send and now > self.last_send + resend:
-                    if e.start - now <= resend:
-                        send_new = True
             else:
                 passed.append(e)
+                
+        send_new = False if self.message else True
+        if send_new == False:
+            for e in upcoming:
+                if e.start - now <= resend:
+                    if self.last_send == None or e.start > self.last_send:
+                        send_new = True
+                        self.last_send = e.start
        
         passed_text = self.alert_text(passed, now)
         upcoming_text = self.alert_text(upcoming, now)
         
         if send_new:
             if self.message:
+                #delete instead of edit
                 await self.edit(passed_text)
+            #don't send if nothing
             await self.send(upcoming_text)
+            send_new = False
         else:
             msg = '\n\n'.join((passed_text, upcoming_text))
             await self.edit(msg)
-            last_send = dt.datetime.now(dt.timezone.utc)
+
             
     async def updater(self):
         while not self.bot.is_closed:
