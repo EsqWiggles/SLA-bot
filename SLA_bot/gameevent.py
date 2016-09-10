@@ -29,10 +29,11 @@ class MultiShipEvent(GameEvent):
     def __init__(self, name, ships, start, end = None):
         super().__init__(name, start, end)
         self.ships = ships
-        self.unscheduled = False
+        self.unscheduled = True
+        
         for event in self.ships[1:]:
-            if event:
-                self.unscheduled = True
+            if not event:
+                self.unscheduled = False
 
     def multi_dur(self, targets, tz):
         if self.unscheduled == False:
