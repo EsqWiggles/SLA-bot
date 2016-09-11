@@ -16,6 +16,7 @@ class AlertChan:
         self.events = []
         self.message = None
         self.last_send = None
+        self.send_new = True
         
     def add(self, events):
         if len(events) < 1:
@@ -61,49 +62,66 @@ class AlertChan:
         
     async def delete():
         await self.bot.delete_message(self.message)
-    
-    async def update(self, resend):
-        if len(self.events) < 1:
-            return
-
+        
+    def split_events(self):
+        upcoming = []
+        passed = []
         now = dt.datetime.now(dt.timezone.utc)
-        passed, upcoming = [], []
         for e in self.events:
             if e.start > now:
                 upcoming.append(e)
             else:
                 passed.append(e)
-                
-        send_new = False if self.message else True
-        if send_new == False:
-            for e in upcoming:
-                if e.start - now <= resend:
-                    if self.last_send == None or e.start > self.last_send:
-                        send_new = True
-                        self.last_send = e.start
-       
+        return upcoming, passed
+        
+    async def send_alert(self):
+        now = dt.datetime.now(dt.timezone.utc)
+        upcoming, passed = self.split_events()
         passed_text = self.alert_text(passed, now)
         upcoming_text = self.alert_text(upcoming, now)
+        if self.message:
+            if passed_text:
+                await self.edit(passed_text)
+            else:
+                await self.delete()
+            self.events = upcoming
+        if upcoming_text:
+            await self.send(upcoming_text)
+            self.send_new = False
+            
+    async def update_alert(self):
+        now = dt.datetime.now(dt.timezone.utc)
+        upcoming, passed = self.split_events()
+        passed_text = self.alert_text(passed, now)
+        upcoming_text = self.alert_text(upcoming, now)
+        msg = '\n\n'.join((passed_text, upcoming_text))
+        await self.edit(msg)
         
-        if send_new:
-            if self.message:
-                if passed_text:
-                    await self.edit(passed_text)
-                else:
-                    await self.delete()
-                self.events = upcoming
-            if upcoming_text:
-                await self.send(upcoming_text)
-                send_new = False
-        else:
-            msg = '\n\n'.join((passed_text, upcoming_text))
-            await self.edit(msg)
+    def check_resend(self, time_span):
+        if self.send_new == True:
+            return
+        now = dt.datetime.now(dt.timezone.utc)
+        upcoming = [x for x in self.events if x.start > now]
+        for e in upcoming:
+            if e.start - now <= time_span:
+                if self.last_send == None or e.start > self.last_send:
+                    send_new = True
+                    self.last_send = e.start
+    
+    async def update(self):
+        if len(self.events) < 1:
+            return
 
+        self.check_resend(cf.alert_every)
+        if self.send_new:
+            await self.send_alert()
+        else:
+            await self.update_alert()
             
     async def updater(self):
         while not self.bot.is_closed:
             try:
-                await self.update(cf.alert_every)
+                await self.update()
             except (discord.errors.HTTPException, discord.errors.Forbidden):
                 continue
             except (discord.errors.NotFound, discord.errors.InvalidArgument):
