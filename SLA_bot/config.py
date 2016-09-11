@@ -69,9 +69,9 @@ class Config:
         Config.channels = Config._chan_config.parse()
         
     def delete_chans(ids):
-        _chan_config.read(chan_path)
+        Config._chan_config.read(Config.chan_path)
         for i in ids:
-            _chan_config.delete(i)
-        _chan_config.write(chan_path)
-        Config.channels = _chan_config.parse()
+            Config._chan_config.delete(i)
+        Config._chan_config.write(Config.chan_path)
+        Config.channels = Config._chan_config.parse()
 

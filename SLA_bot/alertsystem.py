@@ -19,6 +19,7 @@ class AlertChan:
         self.message = None
         self.last_send = None
         self.send_new = True
+        self._update_task = bot.loop.create_task(self.updater())
         
     def add(self, events):
         if len(events) < 1:
@@ -130,6 +131,9 @@ class AlertChan:
                 break
             now = dt.datetime.now(dt.timezone.utc)
             await asyncio.sleep(60 - now.second)
+            
+    def stop_updater(self):
+        self._update_task.cancel()
 
 class AlertSystem:
     """Manages alerts for events and emergency quests.
@@ -143,9 +147,7 @@ class AlertSystem:
         self._last_feed_time = None
         
         for chan in cf.channels:
-            a = AlertChan(chan[0], chan[1], bot)
-            bot.loop.create_task(a.updater())
-            self.achans.append(a)
+            self.achans.append(AlertChan(chan[0], chan[1], bot))
 
     def from_schedule(self):
         if self.schedule.edir == None:
@@ -194,7 +196,73 @@ class AlertSystem:
                     chan.add(new_events)
             now = dt.datetime.now(dt.timezone.utc)
             await asyncio.sleep(60 - now.second)
+            
+    def add_channel(self, id, filters):
+        for achan in self.achans:
+            if achan.channel and achan.channel.id == id:
+                cf.set_chan(id, filters)
+                for c in cf.channels:
+                    if c[0] == id:
+                        achan.targets = c[1]
+                return
+    
+        cf.set_chan(id, filters)
+        targets =''
+        for c in cf.channels:
+            if c[0] == id:
+                targets = c[1]
+        
+        achan = AlertChan(id, targets, self.bot)
+        now = dt.datetime.now(dt.timezone.utc)
+        new_events = self.schedule.from_range(now, self._last_sched_time)
+        if self.feeds and len(self.feeds) > 1:
+            latest_feed = self.feeds[0]
+            if latest_feed.unscheduled:
+                new_events.extend([latest_feed])
+        achan.add(new_events)
+        self.achans.append(achan)
 
+    def delete_channel(self, id):
+        i = len(self.achans)
+        for i, achan in enumerate(self.achans):
+            if achan.channel and achan.channel.id == id:
+                achan.stop_updater()
+                cf.delete_chans([id])
+                break
+        if i < len(self.achans):
+            self.achans.pop(i)
+
+    @commands.command(pass_context=True, no_pm=True, help=cs.SET_ALERTS_HELP)
+    async def set_alerts(self, ctx, filters='1,2,3,4,5,6,7,8,9,10'):
+        perm = ctx.message.channel.permissions_for(ctx.message.author)
+        id = ctx.message.channel.id
+        if perm.manage_channels:
+            self.add_channel(id, filters)
+            
+    @commands.command(pass_context=True, no_pm=True, help=cs.REMOVE_ALERTS_HELP)
+    async def remove_alerts(self, ctx):
+        perm = ctx.message.channel.permissions_for(ctx.message.author)
+        id = ctx.message.channel.id
+        if perm.manage_channels:
+            self.delete_channel(id)
+            
+    @commands.command(hidden=True, enabled=False, help='')
+    async def remove_unreachable(self):
+        #needs user must be owner, enable when implemented
+        unreachable = []
+        for i, achan in enumerate(self.achans):
+            if achan and not achan.channel:
+                unreachable.append(i)
+        for i in unreachable:
+            self.achans.pop(i)
+        
+        deleted = []
+        for chan in cf.channels:
+            id = chan[0]
+            if self.bot.get_channel(id) == None:
+                deleted.append(id)
+        cf.delete_chans(deleted)
+            
     @commands.command(pass_context=True, no_pm=True, help = cs.RESEND_HELP)
     async def resend(self, ctx):
         curr_chan = ctx.message.channel

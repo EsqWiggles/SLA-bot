@@ -49,12 +49,6 @@ async def on_ready():
     bot.loop.create_task(alerter.feed_update())
     bot.loop.create_task(alerter.update())
 
-@bot.command(pass_context=True, no_pm=True, hidden=True, enabled=False)
-async def announce(ctx, filters='1,2,3,4,5,6,7,8,9,10'):
-    perm = ctx.message.channel.permissions_for(ctx.message.author)
-    id = ctx.message.channel.id
-    if perm.manage_channels:
-        cf.set_chan(id, filters)
 
 bot.run(cf.token)
 

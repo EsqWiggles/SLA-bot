@@ -80,8 +80,8 @@ Print takes in two options, "date" and "timezone" in this order.
 RESEND_HELP = '''Resend the alert text on the current channel.
     Only works if the current channel has alerts enabled.
     Intended for resending the alert message if the previous on is too far
-    in the chat log.
-'''
+    in the chat log.'''
 
+SET_ALERTS_HELP = '''Enable alerts for this channel or change its filters.'''
 
-
+REMOVE_ALERTS_HELP = '''Disable alerts for this channel'''
