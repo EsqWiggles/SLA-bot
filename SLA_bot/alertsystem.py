@@ -8,13 +8,14 @@ from   discord.ext import commands
 import SLA_bot.alertfeed as AlertFeed
 import SLA_bot.constants as cs
 from   SLA_bot.config import Config as cf
+from   SLA_bot.gameevent import MultiShipEvent
 
 
 class AlertChan:
-    def __init__(self, id, targets, bot):
+    def __init__(self, id, filters, bot):
         self.bot = bot
         self.channel = bot.get_channel(id)
-        self.targets = targets
+        self.filters = filters
         self.events = []
         self.message = None
         self.last_send = None
@@ -28,28 +29,28 @@ class AlertChan:
         for e in events:
             self.events.append(e)
         self.events.sort(key=lambda event: event.start, reverse=True)
-    
+
     def align_body(text):
+        if not text:
+            return ''
         lines = text.split('\n')
         header = lines[0]
         body = []
         for line in lines[1:]:
             body.append('`| {: >6} |` {}'.format('', line))
         return header + '\n' + '\n'.join(body)
-        
-        
-    
+
     def alert_text(self, events, ref_time):
         lines = []
         for e in events:
-            time_left = math.ceil((e.start - ref_time).total_seconds() / 60)
-            if hasattr(e, 'multi_dur'):
-                text = e.multi_dur(self.targets, cf.tz)
-                if e.unscheduled:
-                    text = AlertChan.align_body(text)
-            else:
-                text = e.duration(cf.tz)
+            text = e.duration(cf.tz)
+            if getattr(e, 'unscheduled', False):
+                text = MultiShipEvent.filter_ships(text, self.filters)
+                text = AlertChan.align_body(text)
+            if text == '':
+                return ''
                 
+            time_left = math.ceil((e.start - ref_time).total_seconds() / 60)
             if time_left < 1:
                 line = '`| {:->6} |` {}'.format('', text)
             else:
@@ -174,6 +175,10 @@ class AlertSystem:
         if self.feeds == None or len(self.feeds) < 1:
             return []
 
+        if self._last_feed_time != self.feeds[3].start:
+            self._last_feed_time = self.feeds[3].start
+            return [self.feeds[3]]
+            
         now = dt.datetime.now(dt.timezone.utc)
         last_update = self._last_feed_time
         most_recent = self.feeds[0].start
@@ -203,16 +208,16 @@ class AlertSystem:
                 cf.set_chan(id, filters)
                 for c in cf.channels:
                     if c[0] == id:
-                        achan.targets = c[1]
+                        achan.filters = c[1]
                 return
     
         cf.set_chan(id, filters)
-        targets =''
+        filters =''
         for c in cf.channels:
             if c[0] == id:
-                targets = c[1]
+                filters = c[1]
         
-        achan = AlertChan(id, targets, self.bot)
+        achan = AlertChan(id, filters, self.bot)
         now = dt.datetime.now(dt.timezone.utc)
         new_events = self.schedule.from_range(now, self._last_sched_time)
         if self.feeds and len(self.feeds) > 1:
@@ -233,7 +238,7 @@ class AlertSystem:
             self.achans.pop(i)
 
     @commands.command(pass_context=True, no_pm=True, help=cs.SET_ALERTS_HELP)
-    async def set_alerts(self, ctx, filters='1,2,3,4,5,6,7,8,9,10'):
+    async def set_alerts(self, ctx, filters='0'):
         perm = ctx.message.channel.permissions_for(ctx.message.author)
         id = ctx.message.channel.id
         if perm.manage_channels:

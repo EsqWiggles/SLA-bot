@@ -35,18 +35,31 @@ class MultiShipEvent(GameEvent):
             if not event:
                 self.unscheduled = False
 
-    def multi_dur(self, targets, tz):
+    def ship_prefix(num):
+        return '`ship {:02d}:`'.format(num)
+        
+    def filter_ships(text, ships):
+        lines = text.splitlines(keepends=True)
+        for num in ships:
+            prefix = MultiShipEvent.ship_prefix(num)
+            lines = [x for x in lines if not x.startswith(prefix)]
+        
+        if len(lines) > 1:
+            return ''.join(lines)
+            
+        #Only has header, better to display nothing
+        return ''
+                
+    def duration(self, tz):
         if self.unscheduled == False:
             return self.ships[0]
         
         ship_events = []
-        for index in targets:
-            line = '`ship {:02d}:`{}'.format(index, self.ships[index])
+        for index in range(1, len(self.ships)):
+            line = MultiShipEvent.ship_prefix(index) + self.ships[index]
             ship_events.append(line)
-        if len(ship_events) < 1:
-            return ''
-        
-        header = self.duration(tz)
+            
+        header = super().duration(tz)
         body = '\n'.join(ship_events)
         return '{}\n{}'.format(header, body)
 

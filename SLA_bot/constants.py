@@ -82,6 +82,21 @@ RESEND_HELP = '''Resend the alert text on the current channel.
     Intended for resending the alert message if the previous on is too far
     in the chat log.'''
 
-SET_ALERTS_HELP = '''Enable alerts for this channel or change its filters.'''
+SET_ALERTS_HELP = '''Enable alerts for this channel or change its filters.\
+set_alerts takes a single option "filters"
 
-REMOVE_ALERTS_HELP = '''Disable alerts for this channel'''
+    filters: ships to exclude from unscheduled alerts, example: 1,7,10
+        0 - include all ships (there is no ship 0 to exclude)
+        1 - exclude ship 1
+        ...
+        ...
+        10 - exclude ship 10
+        1,2,3,4,5,6,7,8,9,10 - exclude every ship
+        (defaults to 0)
+        
+*Note* This command cannot be used in Direct Messages'''
+
+REMOVE_ALERTS_HELP = '''Disable alerts for this channel
+remove_alerts takes no options
+
+*Note* This command cannot be used in Direct Messages'''
