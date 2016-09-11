@@ -18,8 +18,8 @@ class AlertChan:
         self.filters = filters
         self.events = []
         self.message = None
-        self.last_send = None
         self.send_new = True
+        self.last_send = dt.datetime.now(dt.timezone.utc) + cf.resend_before
         self._update_task = bot.loop.create_task(self.updater())
         
     def add(self, events):
