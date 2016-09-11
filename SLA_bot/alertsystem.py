@@ -175,10 +175,6 @@ class AlertSystem:
         if self.feeds == None or len(self.feeds) < 1:
             return []
 
-        if self._last_feed_time != self.feeds[3].start:
-            self._last_feed_time = self.feeds[3].start
-            return [self.feeds[3]]
-            
         now = dt.datetime.now(dt.timezone.utc)
         last_update = self._last_feed_time
         most_recent = self.feeds[0].start
@@ -236,6 +232,21 @@ class AlertSystem:
                 break
         if i < len(self.achans):
             self.achans.pop(i)
+            
+    @commands.command(help=cs.ALLRANDOM_HELP)
+    async def allrandom(self, chosen='1,2,3,4,5,6,7,8,9,10'):
+        now = dt.datetime.now(cf.tz)
+        curr_time = '**Now: ** {}\n\n'.format(now.strftime('%b %d, %H:%M %Z'))
+        await self.bot.whisper(curr_time)
+        
+        chosen_ships = [int(x) for x in chosen.split(',')]
+        filters = [x for x in range(1,11) if x not in chosen_ships]
+        divider = '.\n'
+        for alert in self.feeds:
+            if alert.unscheduled:
+                text = alert.duration(cf.tz)
+                text = MultiShipEvent.filter_ships(text, filters)
+                await self.bot.whisper(divider + text)
 
     @commands.command(pass_context=True, no_pm=True, help=cs.SET_ALERTS_HELP)
     async def set_alerts(self, ctx, filters='0'):

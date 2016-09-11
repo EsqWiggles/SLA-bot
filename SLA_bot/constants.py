@@ -1,3 +1,17 @@
+ALLRANDOM_HELP = '''Print out all random / unscheduled emergency quests.
+set_alerts takes a single option "chosen"
+
+    chosen: ships to show when printing, example: 1,7,10
+        0 - hide all ships (there is no ship 0 to choose)
+        1 - show ship 1
+        ...
+        ...
+        10 - show ship 10
+        1,2,3,4,5,6,7,8,9,10 - show every ship
+        (defaults to 1,2,3,4,5,6,7,8,9,10)
+        
+*Note* The response will always be sent as a Direct Messages'''
+
 BOT_HELP = '''A bot for displaying Phantasy Star Online 2 events.
 
 This bot is currently at a very basic level.
@@ -82,7 +96,7 @@ RESEND_HELP = '''Resend the alert text on the current channel.
     Intended for resending the alert message if the previous on is too far
     in the chat log.'''
 
-SET_ALERTS_HELP = '''Enable alerts for this channel or change its filters.\
+SET_ALERTS_HELP = '''Enable alerts for this channel or change its filters.
 set_alerts takes a single option "filters"
 
     filters: ships to exclude from unscheduled alerts, example: 1,7,10
