@@ -3,8 +3,10 @@ import datetime as dt
 import math
 
 import discord
+from   discord.ext import commands
 
 import SLA_bot.alertfeed as AlertFeed
+import SLA_bot.constants as cs
 from   SLA_bot.config import Config as cf
 
 
@@ -60,7 +62,7 @@ class AlertChan:
     async def send(self, msg):
         self.message = await self.bot.send_message(self.channel, msg)
         
-    async def delete():
+    async def delete(self):
         await self.bot.delete_message(self.message)
         
     def split_events(self):
@@ -105,7 +107,7 @@ class AlertChan:
         for e in upcoming:
             if e.start - now <= time_span:
                 if self.last_send == None or e.start > self.last_send:
-                    send_new = True
+                    self.send_new = True
                     self.last_send = e.start
     
     async def update(self):
@@ -130,6 +132,8 @@ class AlertChan:
             await asyncio.sleep(60 - now.second)
 
 class AlertSystem:
+    """Manages alerts for events and emergency quests.
+    """
     def __init__(self, bot, schedule):
         self.bot = bot
         self.schedule = schedule
@@ -191,3 +195,12 @@ class AlertSystem:
             now = dt.datetime.now(dt.timezone.utc)
             await asyncio.sleep(60 - now.second)
 
+    @commands.command(pass_context=True, no_pm=True, help = cs.RESEND_HELP)
+    async def resend(self, ctx):
+        curr_chan = ctx.message.channel
+        for achan in self.achans:
+            if achan.channel == curr_chan:
+                await achan.send_alert()
+                break
+        
+        

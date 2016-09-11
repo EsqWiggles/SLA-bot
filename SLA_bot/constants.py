@@ -77,7 +77,11 @@ Print takes in two options, "date" and "timezone" in this order.
         for your time zone also changes during daylight saving time. For
         example: PST -8, PDT -7.'''
         
-
+RESEND_HELP = '''Resend the alert text on the current channel.
+    Only works if the current channel has alerts enabled.
+    Intended for resending the alert message if the previous on is too far
+    in the chat log.
+'''
 
 
 
