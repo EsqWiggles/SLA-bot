@@ -1,3 +1,13 @@
+v0.13 @ 2016-09-11
+    - Alert system for scheduled and unscheduled events!
+    - Add several commands for managing alerts
+        - "remove_alerts", "resend", "set_alerts"
+    - Add "allrandom" command to print out unscheduled events
+    - Config file changes:
+        - channels values reversed (ships to include -> ships to exclude)
+        - "alert_every" renamed to "resend_every"
+            * no longer resends at intervals, only once per nearing event
+
 v0.12 @ 2016-09-04
     - Fix bug causing "print" command to not work.
 
