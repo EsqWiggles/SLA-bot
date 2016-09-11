@@ -116,7 +116,7 @@ class AlertChan:
         if len(self.events) < 1:
             return
 
-        self.check_resend(cf.alert_every)
+        self.check_resend(cf.resend_before)
         if self.send_new:
             await self.send_alert()
         else:
