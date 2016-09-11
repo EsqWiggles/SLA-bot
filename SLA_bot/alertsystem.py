@@ -58,6 +58,9 @@ class AlertChan:
         
     async def send(self, msg):
         self.message = await self.bot.send_message(self.channel, msg)
+        
+    async def delete():
+        await self.bot.delete_message(self.message)
     
     async def update(self, resend):
         if len(self.events) < 1:
@@ -84,11 +87,14 @@ class AlertChan:
         
         if send_new:
             if self.message:
-                #delete instead of edit
-                await self.edit(passed_text)
-            #don't send if nothing
-            await self.send(upcoming_text)
-            send_new = False
+                if passed_text:
+                    await self.edit(passed_text)
+                else:
+                    await self.delete()
+                self.events = upcoming
+            if upcoming_text:
+                await self.send(upcoming_text)
+                send_new = False
         else:
             msg = '\n\n'.join((passed_text, upcoming_text))
             await self.edit(msg)
