@@ -154,11 +154,11 @@ class Schedule:
         if search == '':
             start = self.edir.next
             end = start + cf.find_default
-            upcoming = range(start, end) 
+            found = self.edir.events[start:end]
         else:
             matched = self.find_idx(search, cf.alias)
             upcoming = [x for x in matched if x >= self.edir.next]
-        found = self.edir.eventsfidx(upcoming)
+            found = self.edir.eventsfidx(upcoming)
         if len(found) > 0:
             messages = Schedule.relstr_event(found, tz)
         else:
