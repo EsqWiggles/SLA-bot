@@ -1,3 +1,10 @@
+v0.14 @ 2016-09-13
+    - Change alert remaining time format from "MMmin" to "HH:MM"
+    - Send "not found" message to "future" command
+    - Bot status now displays help text and time for configured time zone
+    - Config file changes:
+        - "enable_alert" Enable or disable alert announcements to channels
+
 v0.13 @ 2016-09-11
     - Alert system for scheduled and unscheduled events!
     - Add several commands for managing alerts

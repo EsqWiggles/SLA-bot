@@ -12,7 +12,7 @@ import SLA_bot.constants as cs
 from   SLA_bot.alertsystem import AlertSystem
 from   SLA_bot.schedule import Schedule
 
-VERSION = 0.13
+VERSION = 0.14
 
 curr_dir = os.path.dirname(__file__)
 configs = [
@@ -38,7 +38,14 @@ async def update_schedule():
         
 bot.loop.create_task(update_schedule())
 
-
+async def clock(bot):
+    while not bot.is_closed:
+        now = dt.datetime.now(dt.timezone.utc)
+        time = now.astimezone(cf.tz).strftime('%H:%M %Z')
+        help = 'Type {}help'.format(cf.cmd_prefix)
+        status = '{} - {}'.format(time, help)
+        await bot.change_status(game=discord.Game(name=status))
+        await asyncio.sleep(60 - now.second)
 
 @bot.event
 async def on_ready():
@@ -48,8 +55,10 @@ async def on_ready():
     bot.add_cog(alerter)
     bot.loop.create_task(alerter.feed_update())
     bot.loop.create_task(alerter.update())
+    bot.loop.create_task(clock(bot))
 
 
+    
 bot.run(cf.token)
 
 
