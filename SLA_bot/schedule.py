@@ -159,7 +159,10 @@ class Schedule:
             matched = self.find_idx(search, cf.alias)
             upcoming = [x for x in matched if x >= self.edir.next]
         found = self.edir.eventsfidx(upcoming)
-        messages = Schedule.relstr_event(found, tz)
+        if len(found) > 0:
+            messages = Schedule.relstr_event(found, tz)
+        else:
+            messages = ['No scheduled {} found.'.format(search or 'events')]
         await self.qsay(messages)
             
     @commands.command(help = cs.NEXT_HELP)
