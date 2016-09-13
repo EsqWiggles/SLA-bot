@@ -30,6 +30,7 @@ class Config:
         Config.max_line = cf.getint('Bot', 'max_line')
         Config.chan_path = cf.get( 'Bot', 'chan_path', 
                                   fallback = Config.chan_path  )
+        Config.enable_alert =  cf.getboolean('Bot', 'enable_alert')
         a_before = cf.getint('Bot', 'alert_before')
         Config.alert_before = dt.timedelta(minutes = a_before)
         r_before = cf.getint('Bot', 'resend_before')

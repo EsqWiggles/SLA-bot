@@ -188,14 +188,15 @@ class AlertSystem:
     async def update(self):
         last_update = None
         while not self.bot.is_closed:
-            new_events = []
-            unscheduled = [x for x in self.from_feed() if x.unscheduled]
-            new_events.extend(self.from_schedule())
-            new_events.extend(unscheduled)
+            if cf.enable_alert:
+                new_events = []
+                unscheduled = [x for x in self.from_feed() if x.unscheduled]
+                new_events.extend(self.from_schedule())
+                new_events.extend(unscheduled)
 
-            if len(new_events) > 0:
-                for chan in self.achans:
-                    chan.add(new_events)
+                if len(new_events) > 0:
+                    for chan in self.achans:
+                        chan.add(new_events)
             now = dt.datetime.now(dt.timezone.utc)
             await asyncio.sleep(60 - now.second)
             
