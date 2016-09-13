@@ -54,7 +54,8 @@ class AlertChan:
             if time_left < 1:
                 line = '`| {:->6} |` {}'.format('', text)
             else:
-                line = '`| {: >3}min |` {}'.format(time_left, text)
+                hour, minute = divmod(time_left, 60)
+                line = '`| {: >3}:{:0>2} |` {}'.format(hour, minute, text)
             lines.append(line)
         return '\n'.join(lines)
  
