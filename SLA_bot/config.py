@@ -22,6 +22,8 @@ class Config:
     
     custom_tz={}
     alias={}
+    
+    _included_configs = []
 
     def parse_values(cf):
         Config.token = cf.get('Bot', 'token')
@@ -35,6 +37,12 @@ class Config:
         Config.alert_before = dt.timedelta(minutes = a_before)
         r_before = cf.getint('Bot', 'resend_before')
         Config.resend_before = dt.timedelta(minutes = r_before)
+        
+        linked_configs = cf.get('Bot', 'include', fallback='').split(',')
+        for path in linked_configs:
+            if path:
+                Config._included_configs.append(path)
+        cf.set('Bot', 'include', '')
                                   
         Config.wkstart_weekday = cf.getint('EQ_Schedule', 'maint_weekday')
         Config.wkstart_time = cf.get('EQ_Schedule', 'maint_time')
@@ -46,7 +54,7 @@ class Config:
         Config.find_default = cf.getint('EQ_Schedule', 'find_default')
         
         Config.custom_tz.update(cf.items('Timezones'))
-        
+
         aliases = cf.items('Alias')
         for a in aliases:
             Config.alias[ a[0] ] = a[1].split(',,')
@@ -57,7 +65,12 @@ class Config:
     def load_config(file_paths):
         for file in file_paths:
             Config._user_cf.read(file)
+        
         Config.parse_values(Config._user_cf)
+        linked_configs = Config._included_configs
+        Config._included_configs = []
+        if len(linked_configs) > 0:
+            Config.load_config(linked_configs)
 
     def dump_config(path):
         with open(path, "w") as config_file:
