@@ -29,11 +29,11 @@ class MultiShipEvent(GameEvent):
     def __init__(self, name, ships, start, end = None):
         super().__init__(name, start, end)
         self.ships = ships
-        self.unscheduled = True
+        self.unscheduled = False
         
         for event in self.ships[1:]:
-            if not event:
-                self.unscheduled = False
+            if event:
+                self.unscheduled = True
 
     def ship_prefix(num):
         return '`ship {:02d}:`'.format(num)

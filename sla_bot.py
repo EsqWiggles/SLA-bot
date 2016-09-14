@@ -12,7 +12,7 @@ import SLA_bot.constants as cs
 from   SLA_bot.alertsystem import AlertSystem
 from   SLA_bot.schedule import Schedule
 
-VERSION = 0.14
+VERSION = 0.15
 
 curr_dir = os.path.dirname(__file__)
 configs = [

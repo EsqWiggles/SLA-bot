@@ -1,3 +1,7 @@
+v0.15 @ 2016-09-14
+    - Fix bug causing bot to stop updating alerts
+    - Changes to properly read new unscheduled event format
+
 v0.14 @ 2016-09-13
     - Change alert remaining time format from "MMmin" to "HH:MM"
     - Send "not found" message to "future" command
