@@ -175,4 +175,26 @@ async def quiet_say(bot, message, max):
             
     await recur_say(message)
 
-
+def chunk_string(large_string, max_length):
+    chunks = []
+    i = 0
+    while i < len(large_string):
+        by_length = i + max_length
+        by_newline = large_string.rfind('\n', i, i + max_length)
+        by_space = large_string.rfind(' ', i, i + max_length)
+        
+        if by_length >= len(large_string):
+            new_chunk = large_string[i:by_length]
+            i = by_length
+        elif by_newline > -1:
+            new_chunk = large_string[i:by_newline]
+            i = by_newline + 1
+        elif by_space > -1:
+            new_chunk = large_string[i:by_space]
+            i = by_space + 1
+        else:
+            new_chunk = large_string[i:by_length]
+            i = by_length
+        if len(new_chunk) > 0:
+            chunks.append(new_chunk)
+    return chunks

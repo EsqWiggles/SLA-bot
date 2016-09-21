@@ -1,4 +1,5 @@
 import configparser
+import collections
 import datetime as dt
 import os
 
@@ -20,7 +21,7 @@ class Config:
     _user_cf = configparser.ConfigParser(allow_no_value = True)
     _chan_config = ChanConfig()
     
-    custom_tz={}
+    custom_tz = collections.OrderedDict()
     alias={}
     
     _included_configs = []

@@ -1,3 +1,5 @@
+MSG_CHAR_LIMIT = 2000
+
 ALLRANDOM_HELP = '''Print out all random / unscheduled emergency quests.
 set_alerts takes a single option "chosen"
 
@@ -114,3 +116,26 @@ REMOVE_ALERTS_HELP = '''Disable alerts for this channel
 remove_alerts takes no options
 
 *Note* This command cannot be used in Direct Messages'''
+
+TZLIST_HELP = '''List the shortcut for time zones.
+tzlist (time zone list) takes a single option "mode"
+
+    mode: the kinds of time zone shortcuts to list
+        other: print shortcuts that are not country codes
+        country: print only the shortcuts that are country codes
+    (defaults to "other")
+    
+*more info* https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes'''
+
+TZINFO_HELP = '''Show information about the time zone
+tzinfo (time zone information) takes a single option "timezone"
+
+    timezone: (defaults to the bot's chosen time zone)
+        CC - two letter country code, example: jp (Japan)
+        +## - UTC offset example: +9 (Japan),  -8 (North America PST)
+        
+        For people who live in countries with multiple time zones, your
+        country code will pick a single time zone (typically the capital).
+        Please find your UTC/GMT offset and use that instead. The offset
+        for your time zone also changes during daylight saving time. For
+        example: PST -8, PDT -7.'''
