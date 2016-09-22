@@ -1,3 +1,7 @@
+v0.16 @ 2016-09-22
+    - Add "tzlist" and "tzinfo" commands to find time zones easier
+    - Update systems are less likely to break
+
 v0.15 @ 2016-09-14
     - Fix bug causing bot to stop updating alerts
     - Changes to properly read new unscheduled event format

@@ -15,7 +15,7 @@ import SLA_bot.constants as cs
 from   SLA_bot.schedule import Schedule
 import SLA_bot.util as ut
 
-VERSION = 0.15
+VERSION = 0.16
 
 curr_dir = os.path.dirname(__file__)
 configs = [
