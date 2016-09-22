@@ -131,6 +131,9 @@ class AlertChan:
                 continue
             except (discord.errors.NotFound, discord.errors.InvalidArgument):
                 break
+            except Exception:
+                print('Ignored following error:')
+                print(traceback.format_exc(), file=sys.stderr)
             now = dt.datetime.now(dt.timezone.utc)
             await asyncio.sleep(60 - now.second)
             
@@ -166,10 +169,14 @@ class AlertSystem:
         last_update = None
         while not self.bot.is_closed:
             now = dt.datetime.now(dt.timezone.utc)
-            data = await AlertFeed.download(url)
-            if len(data) > 0 and data[0]['jst'] != last_update:
-                self.feeds = AlertFeed.parse_notices(data, now)
-                last_update = data[0]['jst']
+            try:
+                data = await AlertFeed.download(url)
+                if len(data) > 0 and data[0]['jst'] != last_update:
+                    self.feeds = AlertFeed.parse_notices(data, now)
+                    last_update = data[0]['jst']
+            except Exception:
+                print('Ignored following error:')
+                print(traceback.format_exc(), file=sys.stderr)
             await asyncio.sleep(60)
             
     def from_feed(self):
@@ -188,15 +195,19 @@ class AlertSystem:
     async def update(self):
         last_update = None
         while not self.bot.is_closed:
-            if cf.enable_alert:
-                new_events = []
-                unscheduled = [x for x in self.from_feed() if x.unscheduled]
-                new_events.extend(self.from_schedule())
-                new_events.extend(unscheduled)
+            try:
+                if cf.enable_alert:
+                    new_events = []
+                    unscheduled = [x for x in self.from_feed() if x.unscheduled]
+                    new_events.extend(self.from_schedule())
+                    new_events.extend(unscheduled)
 
-                if len(new_events) > 0:
-                    for chan in self.achans:
-                        chan.add(new_events)
+                    if len(new_events) > 0:
+                        for chan in self.achans:
+                            chan.add(new_events)
+            except Exception:
+                print('Ignored following error:')
+                print(traceback.format_exc(), file=sys.stderr)
             now = dt.datetime.now(dt.timezone.utc)
             await asyncio.sleep(60 - now.second)
             

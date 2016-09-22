@@ -36,9 +36,13 @@ bot.add_cog(event_schedule)
 
 async def update_schedule():
     while not bot.is_closed:
-        await event_schedule.update()
+        try:
+            await event_schedule.update()
+        except Exception:
+            print('Ignored following error:')
+            print(traceback.format_exc(), file=sys.stderr)
         await asyncio.sleep(cf.refresh_time)
-        
+
 bot.loop.create_task(update_schedule())
 
 def country_zone():
@@ -52,10 +56,14 @@ def country_zone():
 async def clock(bot):
     while not bot.is_closed:
         now = dt.datetime.now(dt.timezone.utc)
-        time = now.astimezone(cf.tz).strftime('%H:%M %Z')
-        help = 'Type {}help'.format(cf.cmd_prefix)
-        status = '{} - {}'.format(time, help)
-        await bot.change_status(game=discord.Game(name=status))
+        try:
+            time = now.astimezone(cf.tz).strftime('%H:%M %Z')
+            help = 'Type {}help'.format(cf.cmd_prefix)
+            status = '{} - {}'.format(time, help)
+            await bot.change_status(game=discord.Game(name=status))
+        except Exception:
+            print('Ignored following error:')
+            print(traceback.format_exc(), file=sys.stderr)
         await asyncio.sleep(60 - now.second)
 
 @bot.command(help = cs.TZLIST_HELP)
