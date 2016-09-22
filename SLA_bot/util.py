@@ -137,19 +137,12 @@ def parse_tz(tz_str, default_tz=None, custom=None):
         custom_tz = tz_str.lower()
         if custom_tz in custom:
             return pytz.timezone(custom[custom_tz])
-            
-    country_code = tz_str.upper()
-    if country_code in pytz.country_timezones:
-        return pytz.timezone(pytz.country_timezones[country_code][0])
-
     try:
         return pytz.timezone(tz_str)
     except pytz.exceptions.UnknownTimeZoneError:
         return None
-
     return None
 
-    
 def line_count(message):
     if type(message) is str:
         return 1 + message.count('\n')
