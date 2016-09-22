@@ -1,5 +1,6 @@
 import asyncio
 import datetime as dt
+import json
 import math
 
 import discord
@@ -168,12 +169,14 @@ class AlertSystem:
         url = 'http://pso2emq.flyergo.eu/api/v2/'
         last_update = None
         while not self.bot.is_closed:
-            now = dt.datetime.now(dt.timezone.utc)
             try:
+                now = dt.datetime.now(dt.timezone.utc)
                 data = await AlertFeed.download(url)
                 if len(data) > 0 and data[0]['jst'] != last_update:
                     self.feeds = AlertFeed.parse_notices(data, now)
                     last_update = data[0]['jst']
+            except json.decoder.JSONDecodeError:
+                pass
             except Exception:
                 print('Ignored following error:')
                 print(traceback.format_exc(), file=sys.stderr)

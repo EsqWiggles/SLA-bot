@@ -1,5 +1,6 @@
 import asyncio
 import datetime as dt
+import re
 
 import aiohttp
 import pytz
@@ -17,9 +18,10 @@ def parse_event_text(text):
     data = text.split('\n')
     for i in range(1,11):
         ship = '{:02d}:'.format(i)
+        regex = '{}(?!\d\d)'.format(ship)
         for line in data:
             line = line.strip()
-            if line.startswith(ship):
+            if re.match(regex, line):
                 events[i] = line[3:]
     return events
 
