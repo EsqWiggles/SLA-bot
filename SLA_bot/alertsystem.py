@@ -2,6 +2,8 @@ import asyncio
 import datetime as dt
 import json
 import math
+import sys
+import traceback
 
 import discord
 from   discord.ext import commands

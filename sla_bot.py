@@ -3,6 +3,7 @@ import collections
 import datetime as dt
 import math
 import os
+import sys
 import traceback
 
 import discord
@@ -15,7 +16,7 @@ import SLA_bot.constants as cs
 from   SLA_bot.schedule import Schedule
 import SLA_bot.util as ut
 
-VERSION = 0.16
+VERSION = 0.17
 
 curr_dir = os.path.dirname(__file__)
 configs = [

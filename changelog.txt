@@ -1,3 +1,6 @@
+v0.17 @ 2016-09-24
+    - Hotfix update systems not ignoring errors properly
+
 v0.16 @ 2016-09-22
     - Add "tzlist" and "tzinfo" commands to find time zones easier
     - Update systems are less likely to break
