@@ -4,6 +4,13 @@ class GameEvent:
         self.start = start
         self.end = end
         
+    def __eq__(self, other):
+        return (self.name == other.name and self.start == other.start and
+               self.end == other.end)
+        
+    def __hash__(self):
+        return hash((self.name, self.start, self.end))
+        
     @classmethod
     def from_ical(cls, component):
         n = component.get('summary')
@@ -28,12 +35,18 @@ class GameEvent:
 class MultiShipEvent(GameEvent):
     def __init__(self, name, ships, start, end = None):
         super().__init__(name, start, end)
-        self.ships = ships
+        self.ships = tuple(ships)
         self.unscheduled = False
         
         for event in self.ships[1:]:
             if event:
                 self.unscheduled = True
+
+    def __eq__(self, other):
+        return super.__eq__(self, other) and self.ships == other.ships
+        
+    def __hash__(self):
+        return hash((self.name, self.start, self.end, self.ships))
 
     def ship_prefix(num):
         return '`ship {:02d}:`'.format(num)
