@@ -19,19 +19,12 @@ class AlertChan:
         self.bot = bot
         self.channel = bot.get_channel(id)
         self.filters = filters
-        self.events = []
+        self.events = set()
         self.message = None
-        self.send_new = True
-        self.last_send = dt.datetime.now(dt.timezone.utc) + cf.resend_before
-        self._update_task = bot.loop.create_task(self.updater())
+        self.last_send = None
         
     def add(self, events):
-        if len(events) < 1:
-            return
-
-        for e in events:
-            self.events.append(e)
-        self.events.sort(key=lambda event: event.start, reverse=True)
+        self.events.update(events)
 
     def align_body(text):
         if not text:
@@ -43,6 +36,17 @@ class AlertChan:
             body.append('`| {: >6} |` {}'.format('', line))
         return header + '\n' + '\n'.join(body)
 
+    def split_events(events):
+        upcoming = []
+        passed = []
+        now = dt.datetime.now(dt.timezone.utc)
+        for e in sorted(events, key=lambda event: event.start, reverse=True):
+            if e.start > now:
+                upcoming.append(e)
+            else:
+                passed.append(e)
+        return passed, upcoming
+        
     def alert_text(self, events, ref_time):
         lines = []
         for e in events:
@@ -70,21 +74,9 @@ class AlertChan:
         
     async def delete(self):
         await self.bot.delete_message(self.message)
-        
-    def split_events(self):
-        upcoming = []
-        passed = []
+
+    async def send_alert(self, passed, upcoming):
         now = dt.datetime.now(dt.timezone.utc)
-        for e in self.events:
-            if e.start > now:
-                upcoming.append(e)
-            else:
-                passed.append(e)
-        return upcoming, passed
-        
-    async def send_alert(self):
-        now = dt.datetime.now(dt.timezone.utc)
-        upcoming, passed = self.split_events()
         passed_text = self.alert_text(passed, now)
         upcoming_text = self.alert_text(upcoming, now)
         if self.message:
@@ -92,56 +84,38 @@ class AlertChan:
                 await self.edit(passed_text)
             else:
                 await self.delete()
-            self.events = upcoming
+            self.events = set(upcoming)
         if upcoming_text:
             await self.send(upcoming_text)
             self.send_new = False
+            self.last_send = dt.datetime.now(dt.timezone.utc)
             
-    async def update_alert(self):
+    async def edit_alert(self, passed, upcoming):
         now = dt.datetime.now(dt.timezone.utc)
-        upcoming, passed = self.split_events()
         passed_text = self.alert_text(passed, now)
         upcoming_text = self.alert_text(upcoming, now)
         msg = '\n\n'.join((passed_text, upcoming_text))
         await self.edit(msg)
-        
-    def check_resend(self, time_span):
-        if self.send_new == True:
-            return
+    
+    def should_resend(self, events, time_span):
+        if self.last_send == None:
+            return True
         now = dt.datetime.now(dt.timezone.utc)
-        upcoming = [x for x in self.events if x.start > now]
-        for e in upcoming:
-            if e.start - now <= time_span:
-                if self.last_send == None or e.start > self.last_send:
-                    self.send_new = True
-                    self.last_send = e.start
+        for e in events:
+            resend_time = e.start - time_span
+            if resend_time <= now and resend_time > self.last_send:
+                return True
+        return False
     
     async def update(self):
         if len(self.events) < 1:
             return
-
-        self.check_resend(cf.resend_before)
-        if self.send_new:
-            await self.send_alert()
+            
+        passed, upcoming = AlertChan.split_events(self.events)
+        if self.should_resend(upcoming, cf.resend_before):
+            await self.send_alert(passed, upcoming)
         else:
-            await self.update_alert()
-            
-    async def updater(self):
-        while not self.bot.is_closed:
-            try:
-                await self.update()
-            except (discord.errors.HTTPException, discord.errors.Forbidden):
-                continue
-            except (discord.errors.NotFound, discord.errors.InvalidArgument):
-                break
-            except Exception:
-                print('Ignored following error:')
-                print(traceback.format_exc(), file=sys.stderr)
-            now = dt.datetime.now(dt.timezone.utc)
-            await asyncio.sleep(60 - now.second)
-            
-    def stop_updater(self):
-        self._update_task.cancel()
+            await self.edit_alert(passed, upcoming)
 
 class AlertSystem:
     """Manages alerts for events and emergency quests.
@@ -151,21 +125,8 @@ class AlertSystem:
         self.schedule = schedule
         self.achans = []
         self.feeds = []
-        self._last_sched_time = None
-        self._last_feed_time = None
-        
         for chan in cf.channels:
             self.achans.append(AlertChan(chan[0], chan[1], bot))
-
-    def from_schedule(self):
-        if self.schedule.edir == None:
-            return []
-        now = dt.datetime.now(dt.timezone.utc)
-        last_update = self._last_sched_time
-        alert_from = last_update if last_update else now
-        alert_to = now + cf.alert_before
-        self._last_sched_time = alert_to
-        return self.schedule.from_range(alert_from, alert_to)
 
     async def feed_update(self):
         url = 'http://pso2emq.flyergo.eu/api/v2/'
@@ -183,37 +144,22 @@ class AlertSystem:
                 print('Ignored following error:')
                 print(traceback.format_exc(), file=sys.stderr)
             await asyncio.sleep(60)
-            
-    def from_feed(self):
-        if self.feeds == None or len(self.feeds) < 1:
-            return []
-
-        now = dt.datetime.now(dt.timezone.utc)
-        last_update = self._last_feed_time
-        most_recent = self.feeds[0].start
-        if last_update != most_recent:
-            self._last_feed_time = most_recent
-            if most_recent > now:
-                return [self.feeds[0]]
-        return []
         
     async def update(self):
-        last_update = None
         while not self.bot.is_closed:
+            now = dt.datetime.now(dt.timezone.utc)
+            alert_to = now + cf.alert_before
             try:
                 if cf.enable_alert:
-                    new_events = []
-                    unscheduled = [x for x in self.from_feed() if x.unscheduled]
-                    new_events.extend(self.from_schedule())
-                    new_events.extend(unscheduled)
-
-                    if len(new_events) > 0:
-                        for chan in self.achans:
-                            chan.add(new_events)
+                    upcoming = self.schedule.from_range(now, alert_to)
+                    unscheduled = [x for x in self.feeds if x.unscheduled]
+                    upcoming.extend([x for x in unscheduled if x.start > now])
+                    for chan in self.achans:
+                        chan.add(upcoming)
+                        await chan.update()
             except Exception:
                 print('Ignored following error:')
                 print(traceback.format_exc(), file=sys.stderr)
-            now = dt.datetime.now(dt.timezone.utc)
             await asyncio.sleep(60 - now.second)
             
     def add_channel(self, id, filters):
@@ -232,20 +178,12 @@ class AlertSystem:
                 filters = c[1]
         
         achan = AlertChan(id, filters, self.bot)
-        now = dt.datetime.now(dt.timezone.utc)
-        new_events = self.schedule.from_range(now, self._last_sched_time)
-        if self.feeds and len(self.feeds) > 1:
-            latest_feed = self.feeds[0]
-            if latest_feed.unscheduled:
-                new_events.extend([latest_feed])
-        achan.add(new_events)
         self.achans.append(achan)
 
     def delete_channel(self, id):
         i = len(self.achans)
         for i, achan in enumerate(self.achans):
             if achan.channel and achan.channel.id == id:
-                achan.stop_updater()
                 cf.delete_chans([id])
                 break
         if i < len(self.achans):
@@ -302,7 +240,6 @@ class AlertSystem:
         curr_chan = ctx.message.channel
         for achan in self.achans:
             if achan.channel == curr_chan:
-                await achan.send_alert()
+                passed, upcoming = AlertChan.split_events(achan.events)
+                await achan.send_alert(passed, upcoming)
                 break
-        
-        
