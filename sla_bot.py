@@ -54,7 +54,7 @@ class Cabinet:
 
 async def recyle_messages(channel):
     required_messages = len(Cabinet.module_cache)
-    messages = bot.logs_from(channel, limit=required_messages)
+    messages = bot.logs_from(channel, limit=required_messages, reverse=True)
     recyled = []
     async for msg in messages:
         if msg.author.id == bot.user.id:
