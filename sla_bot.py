@@ -16,6 +16,7 @@ import SLA_bot.constants as cs
 from   SLA_bot.schedule import Schedule
 import SLA_bot.util as ut
 from   SLA_bot.alertfeed import AlertFeed
+from   SLA_bot.clock import Clock
 
 VERSION = 0.17
 
@@ -37,6 +38,7 @@ channel_messages = {}
                    
 class Cabinet:
     module_cache = collections.OrderedDict()
+    module_cache[Clock] = 'No data'
     module_cache[AlertFeed] = 'No data'
 
     async def update():
