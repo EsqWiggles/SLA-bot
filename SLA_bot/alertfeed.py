@@ -17,9 +17,6 @@ class AlertFeed:
                 return await response.json()
         except json.decoder.JSONDecodeError:
             pass
-        except Exception:
-            print('Ignored following error:')
-            print(traceback.format_exc(), file=sys.stderr)
 
     def parse_data(data):
         latest_alert = data[0]['text']

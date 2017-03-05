@@ -17,6 +17,7 @@ from   SLA_bot.schedule import Schedule
 import SLA_bot.util as ut
 from   SLA_bot.alertfeed import AlertFeed
 from   SLA_bot.clock import Clock
+from   SLA_bot.channelupdater import ChannelUpdater
 
 VERSION = 0.17
 
@@ -30,68 +31,8 @@ cf.chan_path = os.path.join(curr_dir, cf.chan_path)
 cf.load_config(configs)  
 
 
-
-
 bot = commands.Bot(command_prefix=cf.cmd_prefix, pm_help = True,
                    description=cs.BOT_HELP)
-channel_messages = {}
-                   
-class Cabinet:
-    module_cache = collections.OrderedDict()
-    module_cache[Clock] = 'No data'
-    module_cache[AlertFeed] = 'No data'
-
-    async def update():
-        for m in Cabinet.module_cache:
-            Cabinet.module_cache[m] = await m.fetch()
-            
-    def contents():
-        components = []
-        for k, v in Cabinet.module_cache.items():
-            components.append(v)
-        return components
-            
-
-async def recyle_messages(channel):
-    required_messages = len(Cabinet.module_cache)
-    messages = bot.logs_from(channel, limit=required_messages, reverse=True)
-    recyled = []
-    async for msg in messages:
-        if msg.author.id == bot.user.id:
-            recyled.append(msg)
-        else:
-            break
-    return recyled
-            
-async def write(chan_msgs):
-    texts = Cabinet.contents()
-    required_messages = len(Cabinet.module_cache)
-    for chan, msgs in chan_msgs.items():
-        if chan == None:
-            continue
-            
-        for i in range(required_messages):
-            try:
-                msgs[i] = await bot.edit_message(msgs[i], texts[i])
-            except IndexError:
-                new_msg = await bot.send_message(chan, texts[i])
-                msgs.append(new_msg)
-            except discord.errors.NotFound:
-                chan_msgs[chan] = await recyle_messages(chan)
-                break
-        
-async def updater():
-    while not bot.is_closed:
-        try:
-            await Cabinet.update()
-            await write(channel_messages)
-        except Exception:
-            print('Ignored following error:')
-            print(traceback.format_exc(), file=sys.stderr)
-
-        await asyncio.sleep(20)
-
-
 
 # event_schedule = Schedule(bot)
 # bot.add_cog(event_schedule)
@@ -176,17 +117,9 @@ async def updater():
 async def on_ready():
     print('Logged in as: {}'.format(bot.user.name))
     print('------')
-    # alerter = AlertSystem(bot, event_schedule)
-    # bot.add_cog(alerter)
-    # bot.loop.create_task(alerter.feed_update())
-    # bot.loop.create_task(alerter.update())
-    # bot.loop.create_task(clock(bot))
-    for c in cf.channels:
-        channel = bot.get_channel(c[0])
-        channel_messages[channel] = await recyle_messages(channel)
+    updater = ChannelUpdater(bot)
+    await updater.make_updaters()
 
-    
-    bot.loop.create_task(updater())
 
 bot.run(cf.token)
 
