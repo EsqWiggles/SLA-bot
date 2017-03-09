@@ -9,6 +9,7 @@ import discord
 from   SLA_bot.config import Config as cf
 from   SLA_bot.alertfeed import AlertFeed
 from   SLA_bot.clock import Clock
+from   SLA_bot.pso2calendar import PSO2Calendar
 
 class ChannelUpdater:
     def __init__(self, bot):
@@ -17,6 +18,7 @@ class ChannelUpdater:
         self.modules = collections.OrderedDict()
         self.modules[Clock] = 'No data'
         self.modules[AlertFeed] = 'No data'
+        self.modules[PSO2Calendar] = 'No data'
     
     
     async def recyle_messages(self, channel):
@@ -36,11 +38,12 @@ class ChannelUpdater:
         
     async def write_content(self, channel, nth_msg, content):
         m = self.channel_messages[channel]
+        c = content[:2000]
         try:
-            m[nth_msg] = await self.bot.edit_message(m[nth_msg], content)
+            m[nth_msg] = await self.bot.edit_message(m[nth_msg], c)
         except IndexError:
             try:
-                new_msg = await self.bot.send_message(channel, content)
+                new_msg = await self.bot.send_message(channel, c)
                 m.append(new_msg)
                 self.channel_messages[channel] = await self.recyle_messages(channel)
             except (discord.errors.Forbidden, discord.errors.NotFound):
@@ -65,3 +68,4 @@ class ChannelUpdater:
             self.channel_messages[chan] = await self.recyle_messages(chan)
         self.bot.loop.create_task(self.updater(Clock.fetch, 0, 2))
         self.bot.loop.create_task(self.updater(AlertFeed.fetch, 1, 8))
+        #self.bot.loop.create_task(self.updater(PSO2Calendar.fetch, 2, 8))
