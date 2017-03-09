@@ -42,8 +42,8 @@ class PSO2Calendar:
             
     async def update():
         now = dt.datetime.now(dt.timezone.utc)
-        now = now.astimezone(dt.timezone.utc)
-        url = GcalUtil.build_get(PSO2Calendar.id, cf.google_api_key, end_min = now)
+        max = now + dt.timedelta(days=14)
+        url = GcalUtil.build_get(PSO2Calendar.id, cf.google_api_key, now, max)
         data = await PSO2Calendar.download(url)
         PSO2Calendar.events = GcalUtil.parse_data(data)
         PSO2Calendar.events.sort(key=lambda event: event.start)
