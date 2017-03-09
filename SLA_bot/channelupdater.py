@@ -68,4 +68,4 @@ class ChannelUpdater:
             self.channel_messages[chan] = await self.recyle_messages(chan)
         self.bot.loop.create_task(self.updater(Clock.fetch, 0, 2))
         self.bot.loop.create_task(self.updater(AlertFeed.fetch, 1, 8))
-        #self.bot.loop.create_task(self.updater(PSO2Calendar.fetch, 2, 8))
+        self.bot.loop.create_task(self.updater(PSO2Calendar.fetch, 2, 8))

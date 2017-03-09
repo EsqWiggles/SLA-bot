@@ -62,6 +62,7 @@ class Config:
             
         Config._chan_config.read(Config.chan_path)
         Config.channels = Config._chan_config.parse()
+        Config.google_api_key = cf.get('Bot', 'google_api_key')
         
     def load_config(file_paths):
         for file in file_paths:
