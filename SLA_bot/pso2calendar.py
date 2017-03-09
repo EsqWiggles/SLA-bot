@@ -12,11 +12,34 @@ from   SLA_bot.gcalutil import GcalUtil
 class PSO2Calendar:
     id = 'pso2emgquest@gmail.com'
     events = []
-
+    counter = {}
+    groups = ["Arks League", "Casino Boost"]
+    
     async def download(url):
         async with aiohttp.get(url) as response:
             return await response.json()
 
+    def count_events():
+        count = {}
+        for e in PSO2Calendar.events:
+            key = e.name
+            for g in PSO2Calendar.groups:
+                if g in key:
+                    key = g
+            try:
+                count[key] += 1
+            except KeyError:
+                count[key] = 1
+        return count
+        
+    def strfcount():
+        lines = []
+        data = sorted(PSO2Calendar.counter.items(), key=lambda x: x[0])
+        for name, count in data:
+            lines.append('`x{:>3}` {}'.format(count, name))
+        return '\n'.join(lines)
+        
+            
     async def update():
         now = dt.datetime.now(dt.timezone.utc)
         now = now.astimezone(dt.timezone.utc)
@@ -24,10 +47,14 @@ class PSO2Calendar:
         data = await PSO2Calendar.download(url)
         PSO2Calendar.events = GcalUtil.parse_data(data)
         PSO2Calendar.events.sort(key=lambda event: event.start)
+        PSO2Calendar.counter = PSO2Calendar.count_events()
+            
 
     async def fetch():
         await PSO2Calendar.update()
         now = dt.datetime.now(dt.timezone.utc)
         max = dt.timedelta(hours=24)
         upcoming = [x for x in PSO2Calendar.events if x.start - now < max]
-        return GcalUtil.strfcalendar(upcoming, now, cf.tz)
+        schedule = GcalUtil.strfcalendar(upcoming, now, cf.tz)
+        summary = PSO2Calendar.strfcount()
+        return schedule + '\n\n' + summary
