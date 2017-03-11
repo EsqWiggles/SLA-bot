@@ -2,6 +2,8 @@ import collections
 import datetime as dt
 import urllib.parse
 
+import SLA_bot.util as ut
+
 class GcalUtil:
     class CalendarEvent:
         def __init__(self, name, start, end):
@@ -40,38 +42,19 @@ class GcalUtil:
         url = 'https://www.googleapis.com/calendar/v3/calendars/{}/events?'
         params = urllib.parse.urlencode(query)
         return url.format(urllib.parse.quote_plus(cal_id)) + params
-        
-    def hour_minute(tdelta):
-        total_m = round(tdelta.total_seconds()/60)
-        hour, minute = divmod(total_m, 60)
-        h = '{:>2}h'.format(hour) if hour > 0 else '{:>3}'.format('')
-        return '{} {:02d}m'.format(h, minute)
-        
-    def single_unit(tdelta):
-        total_s = tdelta.total_seconds()
-        units = collections.OrderedDict()
-        units['d'] = total_s/(24*60*60)
-        units['h'] = total_s/(60*60)
-        units['m'] = total_s/(60)
-        for unit, value in units.items():
-            if value < 1:
-                continue
-            if value < 100:
-                return '{:.2g}{}'.format(value, unit)
-            return '{}{}'.format(round(value), unit)
-        return '0m'
-        
+
     def strfcalendar(events, reference_time, time_zone):
         lines = []
         for event in events:
             s_tdelta = event.start - reference_time
             e_tdelta = event.end - reference_time
             if s_tdelta > dt.timedelta(seconds=0):
-                status = GcalUtil.hour_minute(s_tdelta)
+                status = ut.two_unit_tdelta(s_tdelta)
             elif e_tdelta > dt.timedelta(seconds=0):
-                status = 'End {:>3}'.format(GcalUtil.single_unit(e_tdelta))
+                status = ut.one_unit_tdelta(e_tdelta)
             else:
                 status = 'Ended'
+            status = '{:>7}'.format(status)
             
             s = event.start.astimezone(time_zone).strftime('%H:%M')
             e = event.end.astimezone(time_zone).strftime('%H:%M %Z')
