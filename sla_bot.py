@@ -18,7 +18,6 @@ import SLA_bot.util as ut
 
 
 
-
 VERSION = 0.17
 
 curr_dir = os.path.dirname(__file__)
@@ -34,7 +33,8 @@ cf.load_config(configs)
 bot = commands.Bot(command_prefix=cf.cmd_prefix, pm_help = True,
                    description=cs.BOT_HELP)
 
-
+initialized = False
+                   
 async def bot_status(bot):
     while not bot.is_closed:
         now = dt.datetime.now(dt.timezone.utc)
@@ -104,9 +104,12 @@ async def next(search='',):
 async def on_ready():
     print('Logged in as: {}'.format(bot.user.name))
     print('------')
-    updater = ChannelUpdater(bot)
-    await updater.make_updaters()
-    bot.loop.create_task(bot_status(bot))
+    global initialized
+    if not initialized:
+        updater = ChannelUpdater(bot)
+        await updater.make_updaters()
+        bot.loop.create_task(bot_status(bot))
+        initialized = True
 
 
 bot.run(cf.token)
