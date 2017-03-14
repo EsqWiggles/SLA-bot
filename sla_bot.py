@@ -10,7 +10,7 @@ from   discord.ext import commands
 from   SLA_bot.alertfeed import AlertFeed
 from   SLA_bot.channelupdater import ChannelUpdater
 from   SLA_bot.clock import Clock
-from   SLA_bot.config import Config as cf
+import SLA_bot.config as cf
 import SLA_bot.constants as cs
 from   SLA_bot.pso2calendar import PSO2Calendar
 import SLA_bot.util as ut
@@ -25,12 +25,12 @@ configs = [
     os.path.join(curr_dir, 'docs', 'default_config.ini'),
     os.path.join(curr_dir, 'config.ini')
 ]
-cf.cal_path = os.path.join(curr_dir, cf.cal_path)
-cf.chan_path = os.path.join(curr_dir, cf.chan_path)
-cf.load_config(configs)  
+#cf.cal_path = os.path.join(curr_dir, cf.cal_path)
+#cf.chan_path = os.path.join(curr_dir, cf.chan_path)
+cf.load_configs(configs)  
 
 
-bot = commands.Bot(command_prefix=cf.cmd_prefix, pm_help = True,
+bot = commands.Bot(command_prefix=cf.general.cmd_prefix, pm_help = True,
                    description=cs.BOT_HELP)
 
 initialized = False
@@ -39,8 +39,8 @@ async def bot_status(bot):
     while not bot.is_closed:
         now = dt.datetime.now(dt.timezone.utc)
         try:
-            time = now.astimezone(cf.tz).strftime('%H:%M %Z')
-            status = '{} - {}help'.format(time, cf.cmd_prefix)
+            time = now.astimezone(cf.general.timezone).strftime('%H:%M %Z')
+            status = '{} - {}help'.format(time, cf.general.cmd_prefix)
             await bot.change_presence(game=discord.Game(name=status))
         except Exception:
             print('Ignored following error:')
@@ -49,8 +49,8 @@ async def bot_status(bot):
     
 def strfevent(event, ref_time):
     td = '{:>7}'.format(ut.two_unit_tdelta(event.start - ref_time))
-    s = event.start.astimezone(cf.tz).strftime('%b %d, %H:%M')
-    e = event.end.astimezone(cf.tz).strftime('%H:%M %Z')
+    s = event.start.astimezone(cf.general.timezone).strftime('%b %d, %H:%M')
+    e = event.end.astimezone(cf.general.timezone).strftime('%H:%M %Z')
     return '`|{:^9}|` **{}** @ {} ~ {}'.format(td, event.name, s, e)
 
 @bot.command()
@@ -112,6 +112,6 @@ async def on_ready():
         initialized = True
 
 
-bot.run(cf.token)
+bot.run(cf.general.token)
 
 

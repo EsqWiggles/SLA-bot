@@ -6,7 +6,7 @@ import math
 
 import pytz
 
-from   SLA_bot.config import Config as cf
+import SLA_bot.config as cf
 from   SLA_bot.gcalutil import GcalUtil
 
 class PSO2Calendar:
@@ -43,7 +43,7 @@ class PSO2Calendar:
     async def update():
         now = dt.datetime.now(dt.timezone.utc)
         max = now + dt.timedelta(days=14)
-        url = GcalUtil.build_get(PSO2Calendar.id, cf.google_api_key, now, max)
+        url = GcalUtil.build_get(PSO2Calendar.id, cf.general.google_key, now, max)
         data = await PSO2Calendar.download(url)
         PSO2Calendar.events = GcalUtil.parse_data(data)
         PSO2Calendar.events.sort(key=lambda event: event.start)
@@ -55,6 +55,6 @@ class PSO2Calendar:
         now = dt.datetime.now(dt.timezone.utc)
         max = dt.timedelta(hours=24)
         upcoming = [x for x in PSO2Calendar.events if x.start - now < max]
-        schedule = GcalUtil.strfcalendar(upcoming, now, cf.tz)
+        schedule = GcalUtil.strfcalendar(upcoming, now, cf.general.timezone)
         summary = PSO2Calendar.strfcount()
         return schedule + '\n\n' + summary

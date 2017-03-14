@@ -6,7 +6,7 @@ import traceback
 
 import discord
 
-from   SLA_bot.config import Config as cf
+import SLA_bot.config as cf
 from   SLA_bot.alertfeed import AlertFeed
 from   SLA_bot.clock import Clock
 from   SLA_bot.pso2calendar import PSO2Calendar
@@ -63,7 +63,7 @@ class ChannelUpdater:
             await asyncio.sleep(interval)
             
     async def make_updaters(self):
-        for c in cf.channels:
+        for c in cf.channels.ids:
             chan = self.bot.get_channel(c[0])
             self.channel_messages[chan] = await self.recyle_messages(chan)
         self.bot.loop.create_task(self.updater(Clock.fetch, 0, 2))
