@@ -21,14 +21,9 @@ import SLA_bot.util as ut
 VERSION = 0.17
 
 curr_dir = os.path.dirname(__file__)
-configs = [
-    os.path.join(curr_dir, 'docs', 'default_config.ini'),
-    os.path.join(curr_dir, 'config.ini')
-]
-#cf.cal_path = os.path.join(curr_dir, cf.cal_path)
-#cf.chan_path = os.path.join(curr_dir, cf.chan_path)
-cf.load_configs(configs)  
-
+default_config = os.path.join(curr_dir, 'docs', 'default_config.ini'),
+user_config = os.path.join(curr_dir, 'config.ini')
+cf.load_configs(default_config, user_config)  
 
 bot = commands.Bot(command_prefix=cf.general.cmd_prefix, pm_help = True,
                    description=cs.BOT_HELP)
@@ -99,6 +94,15 @@ async def next(search='',):
         msg = '\n'.join(lines)
     await bot.say(msg[:2000])
         
+@bot.command(pass_context=True, no_pm=True)
+async def toggle(ctx):
+    perm = ctx.message.channel.permissions_for(ctx.message.author)
+    if perm.manage_channels:
+        id = ctx.message.channel.id
+        if id in cf.channels.id_chan:
+            cf.channels.remove(id)
+        else:
+            cf.channels.add(ctx.message.channel)
 
 @bot.event
 async def on_ready():

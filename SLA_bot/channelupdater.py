@@ -63,7 +63,7 @@ class ChannelUpdater:
             await asyncio.sleep(interval)
             
     async def make_updaters(self):
-        for c in cf.channels.ids:
+        for c in cf.channels.id_chan:
             chan = self.bot.get_channel(c[0])
             self.channel_messages[chan] = await self.recyle_messages(chan)
         self.bot.loop.create_task(self.updater(Clock.fetch, 0, 2))

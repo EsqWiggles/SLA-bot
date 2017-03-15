@@ -19,6 +19,7 @@ class PSO2Calendar:
         async with aiohttp.get(url) as response:
             return await response.json()
 
+            #make case insensitive
     def count_events():
         count = {}
         for e in PSO2Calendar.events:
