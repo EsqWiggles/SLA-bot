@@ -3,6 +3,8 @@ import json
 
 import aiohttp
 
+import SLA_bot.config as cf
+
 class AlertFeed:
     source_url = 'http://pso2emq.flyergo.eu/api/v2/'
 
@@ -22,5 +24,6 @@ class AlertFeed:
         return '```fix\n{}\n```'.format(text)
             
     async def fetch():
+        header = cf.get('PSO2 Feed', 'header')
         raw_data = await AlertFeed.download(AlertFeed.source_url)
-        return AlertFeed.parse_data(raw_data)
+        return '** **\n' + header + '\n' + AlertFeed.parse_data(raw_data)

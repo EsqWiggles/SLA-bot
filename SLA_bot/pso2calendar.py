@@ -51,6 +51,7 @@ class PSO2Calendar:
             
 
     async def fetch():
+        header = cf.get('PSO2 Calendar', 'header')
         await PSO2Calendar.update()
         now = dt.datetime.now(dt.timezone.utc)
         max = dt.timedelta(hours=24)
@@ -58,4 +59,4 @@ class PSO2Calendar:
         upcoming = [x for x in PSO2Calendar.events if x.start - now < max]
         schedule = GcalUtil.strfcalendar(upcoming, now, tzone)
         summary = PSO2Calendar.strfcount()
-        return schedule + '\n\n' + summary
+        return '** **\n' + header + '\n\n' + schedule + '\n\n' + summary + '\n** **'
