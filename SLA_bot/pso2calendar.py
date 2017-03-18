@@ -54,7 +54,7 @@ class PSO2Calendar:
         header = cf.get('PSO2 Calendar', 'header')
         await PSO2Calendar.update()
         now = dt.datetime.now(dt.timezone.utc)
-        max = dt.timedelta(hours=24)
+        max = cf.gettdelta('PSO2 Calendar', 'time_range')
         tzone = cf.gettimezone('General', 'timezone')
         upcoming = [x for x in PSO2Calendar.events if x.start - now < max]
         schedule = GcalUtil.strfcalendar(upcoming, now, tzone)
