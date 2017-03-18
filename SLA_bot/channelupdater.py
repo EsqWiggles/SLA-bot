@@ -21,17 +21,19 @@ class ChannelUpdater:
         self.modules[PSO2Calendar] = 'No data'
     
     
-    async def recyle_messages(self, channel):
+    async def recycle_messages(self, channel):
         wanted = len(self.modules)
         try:
-            messages = self.bot.logs_from(channel, limit=wanted, reverse=True)
-            recyled = []
+            messages = self.bot.logs_from(channel, limit=wanted+20, reverse=True)
+            recycled = []
             async for msg in messages:
                 if msg.author.id == self.bot.user.id:
-                    recyled.append(msg)
+                    recycled.append(msg)
                 else:
+                    recycled = []
+                if len(recycled) >= wanted:
                     break
-            return recyled
+            return recycled
         except (discord.errors.Forbidden, discord.errors.NotFound):
             return []
 
@@ -45,7 +47,7 @@ class ChannelUpdater:
             try:
                 new_msg = await self.bot.send_message(channel, c)
                 m.append(new_msg)
-                self.channel_messages[channel] = await self.recyle_messages(channel)
+                self.channel_messages[channel] = await self.recycle_messages(channel)
             except (discord.errors.Forbidden, discord.errors.NotFound):
                 pass
         except discord.errors.NotFound:
@@ -65,7 +67,7 @@ class ChannelUpdater:
     async def load_channels(self):
         for c in cf.channels():
             chan = self.bot.get_channel(c)
-            self.channel_messages[chan] = await self.recyle_messages(chan)
+            self.channel_messages[chan] = await self.recycle_messages(chan)
             
     async def make_updaters(self):
         await self.load_channels()
