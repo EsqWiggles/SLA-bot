@@ -9,5 +9,5 @@ class Clock:
         hand = 12 if hand == 0 else hand
         time = now.strftime('%H:%M')
         date = now.strftime('%Y-%m-%d')
-        s = ":clock{}: **{}**\n:calendar_spiral: {}"
+        s = ":clock{}: **{}**\n:calendar_spiral: `{}`"
         return '** **\n' + header + '\n' + s.format(hand, time, date) + '\n** **'
