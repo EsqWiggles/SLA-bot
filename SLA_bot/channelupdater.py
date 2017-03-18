@@ -62,10 +62,13 @@ class ChannelUpdater:
                 print(traceback.format_exc(), file=sys.stderr)
             await asyncio.sleep(interval)
             
-    async def make_updaters(self):
-        for c in cf.channels.id_chan:
-            chan = self.bot.get_channel(c[0])
+    async def load_channels(self):
+        for c in cf.channels():
+            chan = self.bot.get_channel(c)
             self.channel_messages[chan] = await self.recyle_messages(chan)
+            
+    async def make_updaters(self):
+        await self.load_channels()
         self.bot.loop.create_task(self.updater(Clock.fetch, 0, 2))
         self.bot.loop.create_task(self.updater(AlertFeed.fetch, 1, 8))
         self.bot.loop.create_task(self.updater(PSO2Calendar.fetch, 2, 8))

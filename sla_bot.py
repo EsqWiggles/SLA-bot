@@ -25,17 +25,20 @@ default_config = os.path.join(curr_dir, 'docs', 'default_config.ini'),
 user_config = os.path.join(curr_dir, 'config.ini')
 cf.load_configs(default_config, user_config)  
 
-bot = commands.Bot(command_prefix=cf.general.cmd_prefix, pm_help = True,
-                   description=cs.BOT_HELP)
+prefix = cf.get('General', 'command_prefix')
+tzone = cf.gettimezone('General', 'timezone')
+
+bot = commands.Bot(command_prefix=prefix, pm_help = True, description=cs.BOT_HELP)
 
 initialized = False
+
                    
 async def bot_status(bot):
     while not bot.is_closed:
         now = dt.datetime.now(dt.timezone.utc)
         try:
-            time = now.astimezone(cf.general.timezone).strftime('%H:%M %Z')
-            status = '{} - {}help'.format(time, cf.general.cmd_prefix)
+            time = now.astimezone(tzone).strftime('%H:%M %Z')
+            status = '{} - {}help'.format(time, prefix)
             await bot.change_presence(game=discord.Game(name=status))
         except Exception:
             print('Ignored following error:')
@@ -44,8 +47,8 @@ async def bot_status(bot):
     
 def strfevent(event, ref_time):
     td = '{:>7}'.format(ut.two_unit_tdelta(event.start - ref_time))
-    s = event.start.astimezone(cf.general.timezone).strftime('%b %d, %H:%M')
-    e = event.end.astimezone(cf.general.timezone).strftime('%H:%M %Z')
+    s = event.start.astimezone(tzone).strftime('%b %d, %H:%M')
+    e = event.end.astimezone(tzone).strftime('%H:%M %Z')
     return '`|{:^9}|` **{}** @ {} ~ {}'.format(td, event.name, s, e)
 
 @bot.command()
@@ -99,10 +102,13 @@ async def toggle(ctx):
     perm = ctx.message.channel.permissions_for(ctx.message.author)
     if perm.manage_channels:
         id = ctx.message.channel.id
-        if id in cf.channels.id_chan:
-            cf.channels.remove(id)
+        cf.reload()
+        if id in cf.channels():
+            cf.remove_option('Channels', id)
         else:
-            cf.channels.add(ctx.message.channel)
+            cf.set('Channels', id, '')
+        cf.save()
+        await updater.load_channels()
 
 @bot.event
 async def on_ready():
@@ -110,12 +116,13 @@ async def on_ready():
     print('------')
     global initialized
     if not initialized:
+        global updater
         updater = ChannelUpdater(bot)
         await updater.make_updaters()
         bot.loop.create_task(bot_status(bot))
         initialized = True
 
 
-bot.run(cf.general.token)
+bot.run(cf.get('General', 'bot_token'))
 
 

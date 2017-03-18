@@ -4,8 +4,6 @@ import collections
 import datetime as dt
 import math
 
-import pytz
-
 import SLA_bot.config as cf
 from   SLA_bot.gcalutil import GcalUtil
 
@@ -44,7 +42,8 @@ class PSO2Calendar:
     async def update():
         now = dt.datetime.now(dt.timezone.utc)
         max = now + dt.timedelta(days=14)
-        url = GcalUtil.build_get(PSO2Calendar.id, cf.general.google_key, now, max)
+        api_key = cf.get('General', 'google_api_key')
+        url = GcalUtil.build_get(PSO2Calendar.id, api_key, now, max)
         data = await PSO2Calendar.download(url)
         PSO2Calendar.events = GcalUtil.parse_data(data)
         PSO2Calendar.events.sort(key=lambda event: event.start)
@@ -55,7 +54,8 @@ class PSO2Calendar:
         await PSO2Calendar.update()
         now = dt.datetime.now(dt.timezone.utc)
         max = dt.timedelta(hours=24)
+        tzone = cf.gettimezone('General', 'timezone')
         upcoming = [x for x in PSO2Calendar.events if x.start - now < max]
-        schedule = GcalUtil.strfcalendar(upcoming, now, cf.general.timezone)
+        schedule = GcalUtil.strfcalendar(upcoming, now, tzone)
         summary = PSO2Calendar.strfcount()
         return schedule + '\n\n' + summary

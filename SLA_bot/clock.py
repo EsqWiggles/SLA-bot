@@ -3,7 +3,7 @@ import datetime as dt
 import SLA_bot.config as cf
 class Clock:
     async def fetch():
-        now = dt.datetime.now(cf.general.timezone)
+        now = dt.datetime.now(cf.gettimezone('General', 'timezone'))
         hand = now.hour % 12
         hand = 12 if hand == 0 else hand
         time = now.strftime('%H:%M %Z')
