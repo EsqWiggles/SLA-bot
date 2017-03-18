@@ -17,18 +17,23 @@ class PSO2Calendar:
         async with aiohttp.get(url) as response:
             return await response.json()
 
-            #make case insensitive
     def count_events():
         count = {}
+        earliest_name = {}
         for e in PSO2Calendar.events:
             key = e.name
+            lower = e.name.lower()
             for g in PSO2Calendar.groups:
-                if g in key:
+                if g.lower() in lower:
                     key = g
+            if lower in earliest_name:
+                key = earliest_name[lower]
+
             try:
                 count[key] += 1
             except KeyError:
                 count[key] = 1
+                earliest_name[lower] = key
         return count
         
     def strfcount():
