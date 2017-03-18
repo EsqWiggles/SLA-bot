@@ -57,7 +57,7 @@ class GcalUtil:
             status = '{:>7}'.format(status)
             
             s = event.start.astimezone(time_zone).strftime('%H:%M')
-            e = event.end.astimezone(time_zone).strftime('%H:%M %Z')
+            e = event.end.astimezone(time_zone).strftime('%H:%M')
             n = event.name
             l = '`|{:^9}|`  `{} ~ {}`  **{}**'.format(status, s, e, n)
             lines.append(l)

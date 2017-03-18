@@ -7,7 +7,7 @@ class Clock:
         now = dt.datetime.now(cf.gettimezone('General', 'timezone'))
         hand = now.hour % 12
         hand = 12 if hand == 0 else hand
-        time = now.strftime('%H:%M %Z')
+        time = now.strftime('%H:%M')
         date = now.strftime('%Y-%m-%d')
         s = ":clock{}: **{}**\n:calendar_spiral: {}"
         return '** **\n' + header + '\n' + s.format(hand, time, date) + '\n** **'
