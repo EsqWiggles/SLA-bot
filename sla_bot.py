@@ -53,16 +53,10 @@ def strfevent(event, ref_time):
 
 @bot.command()
 async def find(search='', mode=''):
-    if not search:
-        await boy.say('Please enter a name or part of name to search.')
-        return
-
-    now = dt.datetime.now(dt.timezone.utc)   
-    found = []
-    for event in PSO2Calendar.events:
-        if search.lower() in event.name.lower():
-            found.append(event)
-            
+    now = dt.datetime.now(dt.timezone.utc) 
+    search_lower = search.lower()
+    found = [x for x in PSO2Calendar.events if search_lower in x.name.lower()]
+    num_found = len(found)
     max = cf.getint('General', 'max_find')
     if mode != 'all':
         found = found[:max]
@@ -70,13 +64,15 @@ async def find(search='', mode=''):
     if found:
         lines = []
         for name, count in PSO2Calendar.counter.items():
-            if search.lower() in name.lower():
+            if search_lower in name.lower():
                 lines.append('**{}** {}'.format(count, name))
         lines.append('')
         lines.extend([strfevent(event, now) for event in found])
+        if len(found) < num_found:
+            lines.append('...')
         msg = '\n'.join(lines)
     else:
-        msg = 'No scheduled "{}" found.'.format(search) 
+        msg = 'No scheduled "{}" found.'.format(search or 'events') 
         
     if len(found) > max:
         await bot.whisper(msg[:2000])
