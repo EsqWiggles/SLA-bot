@@ -52,7 +52,7 @@ def strfevent(event, ref_time):
     return '`|{:^9}|` **{}** @ {} ~ {}'.format(td, event.name, s, e)
 
 @bot.command()
-async def find(search=''):
+async def find(search='', mode=''):
     if not search:
         await boy.say('Please enter a name or part of name to search.')
         return
@@ -62,6 +62,11 @@ async def find(search=''):
     for event in PSO2Calendar.events:
         if search.lower() in event.name.lower():
             found.append(event)
+            
+    max = cf.getint('General', 'max_find')
+    if mode != 'all':
+        found = found[:max]
+            
     if found:
         lines = []
         for name, count in PSO2Calendar.counter.items():
@@ -72,7 +77,11 @@ async def find(search=''):
         msg = '\n'.join(lines)
     else:
         msg = 'No scheduled "{}" found.'.format(search) 
-    await bot.say(msg[:2000])
+        
+    if len(found) > max:
+        await bot.whisper(msg[:2000])
+    else:
+        await bot.say(msg[:2000])
 
 @bot.command(help = cs.NEXT_HELP)
 async def next(search='',):
