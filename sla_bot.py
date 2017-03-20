@@ -81,26 +81,24 @@ async def find(search='', mode=''):
 
 @bot.command(help = cs.NEXT_HELP)
 async def next(search='',):
-    if not PSO2Calendar.events:
-        await bot.say('No scheduled events remaining.')
-        return
-
-    now = dt.datetime.now(dt.timezone.utc)          
-    for event in PSO2Calendar.events:
-        if event.start > now:
-            next = event
+    now = dt.datetime.now(dt.timezone.utc)
+    upcoming = [e for e in PSO2Calendar.events if e.start > now]
+    neighbor_time = dt.timedelta(hours=1)
+    max_neighbors = 4
+    found = [] 
+    for i in range( min(max_neighbors, len(upcoming)) ):
+        if upcoming[i].start - upcoming[0].start <= neighbor_time * i:
+            found.append(upcoming[i])
+        else:
             break
     
-    neighbor_time = dt.timedelta(hours=1)
-    if next:
-        found = [next]
-        later = [e for e in PSO2Calendar.events if e.start >= next.start]
-        for event in later:
-            if event != next and event.start - next.start <= neighbor_time:
-                found.append(event)
+    if found:
         lines = [strfevent(event, now) for event in found]
         msg = '\n'.join(lines)
-    await bot.say(msg[:2000])
+        await bot.say(msg[:2000])
+    else:
+        await bot.say('No more scheduled events.')
+    
         
 @bot.command(pass_context=True, no_pm=True)
 async def toggle(ctx):
