@@ -51,7 +51,7 @@ class GcalUtil:
             if s_tdelta > dt.timedelta(seconds=0):
                 status = ut.two_unit_tdelta(s_tdelta)
             elif e_tdelta > dt.timedelta(seconds=0):
-                status = ut.one_unit_tdelta(e_tdelta)
+                status = 'End ' + ut.one_unit_tdelta(e_tdelta)
             else:
                 status = 'Ended'
             status = '{:>7}'.format(status)
