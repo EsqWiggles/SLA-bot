@@ -18,10 +18,11 @@ class AlertFeed:
     def parse_data(data):
         latest_alert = data[0]['text']
         lines = latest_alert.splitlines()
+        code_color = 'fix' if len(lines) >= 10 else ''
         header = '-' * len(lines[0])
         lines.insert(1, header)
         text = '\n'.join(lines)
-        return '```fix\n{}\n```'.format(text)
+        return '```{}\n{}\n```'.format(code_color, text)
             
     async def fetch():
         header = cf.get('PSO2 Feed', 'header')
