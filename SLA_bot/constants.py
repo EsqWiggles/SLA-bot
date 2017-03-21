@@ -14,11 +14,29 @@ set_alerts takes a single option "chosen"
         
 *Note* The response will always be sent as a Direct Messages'''
 
-BOT_HELP = '''A bot for displaying Phantasy Star Online 2 events.
+BOT_HELP = ('Pulls together various Phantasy Star Online 2 information.\n'
+'\n'
+'Provides a clock, information from Emergency Quest calendars, and unscheduled'
+' events.')
 
-This bot is currently at a very basic level.
-There are still some usability issues like choosing time zones.
-Announcements for scheduled and unscheduled events are planned.'''
+FIND_HELP = ('Find upcoming events by name.\n'
+'search (optional): a partial name of the event\n'
+'    Find events with the text given, ignoring case.\n'
+'    Leave blank to find any event.\n'
+'\n'
+'mode (optional): all\n'
+'    Output all of the events and whisper if too long.\n'
+'    Leave blank to shorten it and reply in the channel.\n'
+'\n'
+'This command will count the number of events with names matching the search.'
+' To prevent long messages, this command does not show every event that'
+' matches unless the mode option was set to "all".\n'
+'\n'
+'Examples:\n'
+'    find              (shows the next few events)\n'
+'    find minING       (ignores weird capital)\n'
+'    find "mining base"(need quotes for two words)\n'
+'    find "" all       (need quotes for blacnk search)')
 
 FUTURE_HELP = '''Find future scheduled events by name.
 Future takes in two options, "search" and "timezone" in this order.
@@ -52,21 +70,9 @@ Last takes in two options, "search" and "timezone" in this order.
         for your time zone also changes during daylight saving time. For
         example: PST -8, PDT -7.'''
 
-NEXT_HELP = '''Find the next scheduled event by name.
-Next takes in two options, "search" and "timezone" in this order.
-
-    search: a partial name of the event, example: apocalypse
-        (defaults to displaying any event)
-
-    timezone: (defaults to the bot's chosen time zone)
-        CC - two letter country code, example: jp (Japan)
-        +## - UTC offset example: +9 (Japan),  -8 (North America PST)
-
-        For people who live in countries with multiple time zones, your
-        country code will pick a single time zone (typically the capital).
-        Please find your UTC/GMT offset and use that instead. The offset
-        for your time zone also changes during daylight saving time. For
-        example: PST -8, PDT -7.'''
+NEXT_HELP = ('Find the next scheduled event by name.\n'
+'Only shows events that have not started. This command may output'
+' more than one event if their start times are close together.')
 
 PRINT_HELP = '''Print the scheduled events on the date based on the time zone.
 Print takes in two options, "date" and "timezone" in this order.
@@ -116,6 +122,16 @@ REMOVE_ALERTS_HELP = '''Disable alerts for this channel
 remove_alerts takes no options
 
 *Note* This command cannot be used in Direct Messages'''
+
+TOGGLE_HELP = ('Enable or disable the bot data on a channel.\n'
+"Enables the automatic bot's messages in the channel.This should be used on a"
+' dedicated channel or on one that receives few messages. If the bot messages'
+' gets pushed too far into chat history, it will send new messages when it'
+' crashes or restarts.\n'
+'\n'
+'To disable on a channel, use this command on the channel again.\n'
+'\n'
+'This command requires the "Manage Channels" permission.')
 
 TZLIST_HELP = '''List the shortcut for time zones.
 tzlist (time zone list) takes a single option "mode"

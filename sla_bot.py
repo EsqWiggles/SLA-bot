@@ -51,7 +51,7 @@ def strfevent(event, ref_time):
     e = event.end.astimezone(tzone).strftime('%H:%M %Z')
     return '`|{:^9}|` **{}** @ {} ~ {}'.format(td, event.name, s, e)
 
-@bot.command()
+@bot.command(help = cs.FIND_HELP)
 async def find(search='', mode=''):
     now = dt.datetime.now(dt.timezone.utc) 
     search_lower = search.lower()
@@ -100,7 +100,7 @@ async def next(search='',):
         await bot.say('No more scheduled events.')
     
         
-@bot.command(pass_context=True, no_pm=True)
+@bot.command(pass_context=True, no_pm=True, help = cs.TOGGLE_HELP)
 async def toggle(ctx):
     perm = ctx.message.channel.permissions_for(ctx.message.author)
     if perm.manage_channels:
