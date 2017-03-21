@@ -58,6 +58,8 @@ class PSO2Calendar:
     async def fetch():
         header = cf.get('PSO2 Calendar', 'header')
         await PSO2Calendar.update()
+        if not PSO2Calendar.events:
+            return '** **\n' + header + '\n\n' + 'No more scheduled events!' + '\n** **'
         now = dt.datetime.now(dt.timezone.utc)
         max = cf.gettdelta('PSO2 Calendar', 'time_range')
         tzone = cf.gettimezone('General', 'timezone')
