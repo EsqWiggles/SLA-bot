@@ -21,7 +21,7 @@ import SLA_bot.util as ut
 VERSION = 0.17
 
 curr_dir = os.path.dirname(__file__)
-default_config = os.path.join(curr_dir, 'docs', 'default_config.ini'),
+default_config = os.path.join(curr_dir, 'default_config.ini'),
 user_config = os.path.join(curr_dir, 'config.ini')
 cf.load_configs(default_config, user_config)  
 
