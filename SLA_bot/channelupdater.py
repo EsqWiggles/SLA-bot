@@ -6,10 +6,10 @@ import traceback
 
 import discord
 
+import SLA_bot.alertfeed as AlertFeed
+import SLA_bot.clock as Clock
 import SLA_bot.config as cf
-from   SLA_bot.alertfeed import AlertFeed
-from   SLA_bot.clock import Clock
-from   SLA_bot.pso2calendar import PSO2Calendar
+import SLA_bot.pso2calendar as PSO2Calendar
 
 class ChannelUpdater:
     def __init__(self, bot):

@@ -10,7 +10,7 @@ from   discord.ext import commands
 from   SLA_bot.channelupdater import ChannelUpdater
 import SLA_bot.config as cf
 import SLA_bot.constants as cs
-from   SLA_bot.pso2calendar import PSO2Calendar
+import SLA_bot.pso2calendar as PSO2Calendar
 import SLA_bot.util as ut
 
 
@@ -42,7 +42,7 @@ async def bot_status(bot):
             print('Ignored following error:')
             print(traceback.format_exc(), file=sys.stderr)
         await asyncio.sleep(60 - now.second)
-    
+
 def strfevent(event, ref_time):
     td = '{:>7}'.format(ut.two_unit_tdelta(event.start - ref_time))
     s = event.start.astimezone(tzone).strftime('%b %d, %H:%M')
@@ -96,8 +96,7 @@ async def next(search='',):
         await bot.say(msg[:2000])
     else:
         await bot.say('No more scheduled events.')
-    
-        
+
 @bot.command(pass_context=True, no_pm=True, help = cs.TOGGLE_HELP)
 async def toggle(ctx):
     perm = ctx.message.channel.permissions_for(ctx.message.author)
