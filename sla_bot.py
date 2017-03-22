@@ -7,9 +7,7 @@ import traceback
 import discord
 from   discord.ext import commands
 
-from   SLA_bot.alertfeed import AlertFeed
 from   SLA_bot.channelupdater import ChannelUpdater
-from   SLA_bot.clock import Clock
 import SLA_bot.config as cf
 import SLA_bot.constants as cs
 from   SLA_bot.pso2calendar import PSO2Calendar
@@ -28,7 +26,7 @@ cf.load_configs(default_config, user_config)
 prefix = cf.get('General', 'command_prefix')
 tzone = cf.gettimezone('General', 'timezone')
 
-bot = commands.Bot(command_prefix=prefix, pm_help = True, description=cs.BOT_HELP)
+bot = commands.Bot(command_prefix=prefix, pm_help=True, description=cs.BOT_HELP)
 
 initialized = False
 
