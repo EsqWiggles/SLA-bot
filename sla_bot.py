@@ -7,7 +7,7 @@ import traceback
 import discord
 from   discord.ext import commands
 
-from   SLA_bot.channelupdater import ChannelUpdater
+import SLA_bot.channelupdater as ChannelUpdater
 import SLA_bot.config as cf
 import SLA_bot.constants as cs
 import SLA_bot.pso2calendar as PSO2Calendar
@@ -108,7 +108,7 @@ async def toggle(ctx):
         else:
             cf.set('Channels', id, '')
         cf.save()
-        await updater.load_channels()
+        await ChannelUpdater.load_channels()
 
 @bot.event
 async def on_ready():
@@ -116,9 +116,7 @@ async def on_ready():
     print('------')
     global initialized
     if not initialized:
-        global updater
-        updater = ChannelUpdater(bot)
-        await updater.make_updaters()
+        await ChannelUpdater.init(bot)
         bot.loop.create_task(bot_status(bot))
         initialized = True
 

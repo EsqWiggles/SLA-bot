@@ -47,8 +47,10 @@ async def update():
     api_key = cf.get('General', 'google_api_key')
     url = GcalUtil.build_get(id, api_key, now, max)
     data = await download(url)
+    global events
     events = GcalUtil.parse_data(data)
     events.sort(key=lambda event: event.start)
+    global counter
     counter = count_events()
         
 

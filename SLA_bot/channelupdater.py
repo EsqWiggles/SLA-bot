@@ -10,64 +10,71 @@ import SLA_bot.clock as Clock
 import SLA_bot.config as cf
 import SLA_bot.pso2calendar as PSO2Calendar
 
-class ChannelUpdater:
-    def __init__(self, bot):
-        self.bot = bot
-        self.channel_messages = {}
-        self.modules = [
-            (Clock.fetch, cf.getint('Clock', 'update_interval')),
-            (AlertFeed.fetch, cf.getint('PSO2 Feed', 'update_interval')),
-            (PSO2Calendar.fetch, cf.getint('PSO2 Calendar', 'update_interval')),
-        ]
-    
-    async def recycle_messages(self, channel):
-        wanted = len(self.modules)
-        try:
-            messages = self.bot.logs_from(channel, 100, reverse=True)
-            recycled = []
-            async for msg in messages:
-                if msg.author.id == self.bot.user.id:
-                    recycled.append(msg)
-                else:
-                    recycled = []
-                if len(recycled) >= wanted:
-                    break
-            return recycled
-        except (discord.errors.Forbidden, discord.errors.NotFound):
-            return []
 
-    async def write_content(self, channel, nth_msg, content):
-        m = self.channel_messages[channel]
-        c = content[:2000]
+bot = None
+channel_messages = {}
+modules = []
+
+async def init(discord_bot):
+    global bot
+    global modules
+    bot = discord_bot
+    modules = [
+        (Clock.fetch, cf.getint('Clock', 'update_interval')),
+        (AlertFeed.fetch, cf.getint('PSO2 Feed', 'update_interval')),
+        (PSO2Calendar.fetch, cf.getint('PSO2 Calendar', 'update_interval')),
+    ]
+    await make_updaters()
+
+async def recycle_messages(channel):
+    try:
+        messages = bot.logs_from(channel, 100, reverse=True)
+        recycled = []
+        async for msg in messages:
+            if msg.author.id == bot.user.id:
+                recycled.append(msg)
+            else:
+                recycled = []
+            if len(recycled) >= len(modules):
+                break
+        return recycled
+    except (discord.errors.Forbidden, discord.errors.NotFound):
+        return []
+
+async def write_content(channel, nth_msg, content):
+    global channel_messages
+    m = channel_messages[channel]
+    c = content[:2000]
+    try:
+        m[nth_msg] = await bot.edit_message(m[nth_msg], c)
+    except IndexError:
         try:
-            m[nth_msg] = await self.bot.edit_message(m[nth_msg], c)
-        except IndexError:
-            try:
-                new_msg = await self.bot.send_message(channel, c)
-                m.append(new_msg)
-                self.channel_messages[channel] = await self.recycle_messages(channel)
-            except (discord.errors.Forbidden, discord.errors.NotFound):
-                pass
-        except discord.errors.NotFound:
-            del m[nth_msg]
+            m.append( await bot.send_message(channel, c) )
+            channel_messages[channel] = await recycle_messages(channel)
+        except (discord.errors.Forbidden, discord.errors.NotFound):
+            pass
+    except discord.errors.NotFound:
+        del m[nth_msg]
+    
+async def updater(contentFunc, nth_msg, interval):
+    while not bot.is_closed:
+        try:
+            content = await contentFunc()
+            for channel in channel_messages:
+                await write_content(channel, nth_msg, content)
+        except Exception:
+            print('Ignored following error:')
+            print(traceback.format_exc(), file=sys.stderr)
+        await asyncio.sleep(interval)
         
-    async def updater(self, contentFunc, nth_msg, interval):
-        while not self.bot.is_closed:
-            try:
-                content = await contentFunc()
-                for channel in self.channel_messages:
-                    await self.write_content(channel, nth_msg, content)
-            except Exception:
-                print('Ignored following error:')
-                print(traceback.format_exc(), file=sys.stderr)
-            await asyncio.sleep(interval)
-            
-    async def load_channels(self):
-        for c in cf.channels():
-            chan = self.bot.get_channel(c)
-            self.channel_messages[chan] = await self.recycle_messages(chan)
-            
-    async def make_updaters(self):
-        await self.load_channels()
-        for i, m in enumerate(self.modules):
-            self.bot.loop.create_task(self.updater(m[0], i, m[1]))
+async def load_channels():
+    global channel_messages
+    channel_messages = {}
+    for c in cf.channels():
+        chan = bot.get_channel(c)
+        channel_messages[chan] = await recycle_messages(chan)
+        
+async def make_updaters():
+    await load_channels()
+    for i, m in enumerate(modules):
+        bot.loop.create_task(updater(m[0], i, m[1]))
