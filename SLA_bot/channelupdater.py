@@ -24,7 +24,7 @@ class ChannelUpdater:
     async def recycle_messages(self, channel):
         wanted = len(self.modules)
         try:
-            messages = self.bot.logs_from(channel, limit=wanted+20, reverse=True)
+            messages = self.bot.logs_from(channel, 100, reverse=True)
             recycled = []
             async for msg in messages:
                 if msg.author.id == self.bot.user.id:
