@@ -1,3 +1,23 @@
+v0.30 @ 2017-3-22
+    - Major overhaul in bot functions
+        - Channel updates use multiple messages and data sources now
+            - Includes a clock for the chosen timezone
+            - No longer combines the schedule and unschedule data
+                - Uses a separate message for each now
+        - No more new messages upon restarting/crashing
+            - Except when the bot messages gets burried by other ones
+        - Removed all commands except "future", "next", "set_alerts"
+            "future" renamed to "find" and counts the # of events for you
+            "set_alerts" renamed to "toggle" and no longer takes any options
+            "next" no longer searches, use "find" instead
+            commands no longer take time zone option
+
+    - Config file changes:
+        - Moved default config out of the doc folder
+        - Completely overhauled config options, please see default config.
+        
+    - "usr" folder is no longer used, you may delete it
+
 v0.17 @ 2016-09-24
     - Hotfix update systems not ignoring errors properly
 
