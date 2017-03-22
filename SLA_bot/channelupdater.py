@@ -1,5 +1,4 @@
 import asyncio
-import collections
 import datetime as dt
 import sys
 import traceback
@@ -15,11 +14,11 @@ class ChannelUpdater:
     def __init__(self, bot):
         self.bot = bot
         self.channel_messages = {}
-        self.modules = collections.OrderedDict()
-        self.modules[Clock] = 'No data'
-        self.modules[AlertFeed] = 'No data'
-        self.modules[PSO2Calendar] = 'No data'
-    
+        self.modules = [
+            (Clock.fetch, cf.getint('Clock', 'update_interval')),
+            (AlertFeed.fetch, cf.getint('PSO2 Feed', 'update_interval')),
+            (PSO2Calendar.fetch, cf.getint('PSO2 Calendar', 'update_interval')),
+        ]
     
     async def recycle_messages(self, channel):
         wanted = len(self.modules)
@@ -37,7 +36,6 @@ class ChannelUpdater:
         except (discord.errors.Forbidden, discord.errors.NotFound):
             return []
 
-        
     async def write_content(self, channel, nth_msg, content):
         m = self.channel_messages[channel]
         c = content[:2000]
@@ -71,9 +69,5 @@ class ChannelUpdater:
             
     async def make_updaters(self):
         await self.load_channels()
-        clock_i = cf.getint('Clock', 'update_interval')
-        feed_i = cf.getint('PSO2 Feed', 'update_interval')
-        cal_i = cf.getint('PSO2 Calendar', 'update_interval')
-        self.bot.loop.create_task(self.updater(Clock.fetch, 0, clock_i))
-        self.bot.loop.create_task(self.updater(AlertFeed.fetch, 1, feed_i))
-        self.bot.loop.create_task(self.updater(PSO2Calendar.fetch, 2, cal_i))
+        for i, m in enumerate(self.modules):
+            self.bot.loop.create_task(self.updater(m[0], i, m[1]))
