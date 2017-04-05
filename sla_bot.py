@@ -21,6 +21,13 @@ VERSION = 0.30
 curr_dir = os.path.dirname(__file__)
 default_config = os.path.join(curr_dir, 'default_config.ini'),
 user_config = os.path.join(curr_dir, 'config.ini')
+
+if not os.path.isfile(user_config):
+    cf.new_config(user_config)
+    print("No config file found. Creating one at:\n{}".format(user_config))
+    print("Please edit the config file and restart the program.")
+    exit()
+
 cf.load_configs(default_config, user_config)  
 
 prefix = cf.get('General', 'command_prefix')

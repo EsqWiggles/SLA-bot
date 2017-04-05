@@ -7,6 +7,12 @@ default_config = configparser.ConfigParser(allow_no_value = True)
 user_config = configparser.ConfigParser(allow_no_value = True)
 user_config_path = 'Path not set'
 
+bare_config = """[General]
+bot_token = paste Discord bot token here
+google_api_key = paste Google api key here
+
+[Channels]"""
+
 def channels():
     return [x[0] for x in user_config.items('Channels')]
 
@@ -40,6 +46,11 @@ def load_configs(default, user):
     user_config.read(user)
     global user_config_path
     user_config_path = user
+    
+def new_config(path):
+    with open(path, 'w') as file:
+        file.write(bare_config)
+    
 
 def reload():
     user_config.read(user_config_path)
