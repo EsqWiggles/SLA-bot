@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import datetime as dt
+import string
 
 import SLA_bot.config as cf
 import SLA_bot.gcalutil as GcalUtil
@@ -9,6 +10,7 @@ id = 'pso2emgquest@gmail.com'
 events = []
 counter = {}
 groups = ["Arks League", "Casino Boost"]
+transtable = str.maketrans("", "", string.punctuation + string.whitespace)
 
 async def download(url):
     async with aiohttp.get(url) as response:
@@ -19,19 +21,22 @@ def count_events():
     earliest_name = {}
     for e in events:
         key = e.name
-        lower = e.name.lower()
+        stripped = strip(key)
         for g in groups:
-            if g.lower() in lower:
+            if strip(g) in stripped:
                 key = g
-        if lower in earliest_name:
-            key = earliest_name[lower]
+        if stripped in earliest_name:
+            key = earliest_name[stripped]
 
         try:
             count[key] += 1
         except KeyError:
             count[key] = 1
-            earliest_name[lower] = key
+            earliest_name[stripped] = key
     return count
+
+def strip(s):
+    return s.translate(transtable).lower()
     
 def strfcount():
     lines = []
