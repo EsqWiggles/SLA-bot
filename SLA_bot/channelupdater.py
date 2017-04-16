@@ -9,6 +9,7 @@ import SLA_bot.alertfeed as AlertFeed
 import SLA_bot.clock as Clock
 import SLA_bot.config as cf
 import SLA_bot.pso2calendar as PSO2Calendar
+import SLA_bot.pso2escalendar as PSO2esCalendar
 
 
 bot = None
@@ -23,6 +24,7 @@ async def init(discord_bot):
         (Clock.fetch, cf.getint('Clock', 'update_interval')),
         (AlertFeed.fetch, cf.getint('PSO2 Feed', 'update_interval')),
         (PSO2Calendar.fetch, cf.getint('PSO2 Calendar', 'update_interval')),
+        (PSO2esCalendar.fetch, cf.getint('PSO2es Calendar', 'update_interval')),
     ]
     await make_updaters()
 
