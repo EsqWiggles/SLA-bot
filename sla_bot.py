@@ -16,7 +16,7 @@ import SLA_bot.util as ut
 
 
 
-VERSION = 0.30
+VERSION = 0.31
 
 curr_dir = os.path.dirname(__file__)
 default_config = os.path.join(curr_dir, 'default_config.ini'),

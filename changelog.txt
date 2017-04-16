@@ -1,4 +1,9 @@
-v0.30 @ 2017-3-22
+v0.31 @ 2017-04
+    - Implement a channel message for the PSO2es schedule
+    - Reduce cases where the PSO2 schedule was counting events separately
+    - Create config file template when no config is found
+
+v0.30 @ 2017-03-22
     - Major overhaul in bot functions
         - Channel updates use multiple messages and data sources now
             - Includes a clock for the chosen timezone
