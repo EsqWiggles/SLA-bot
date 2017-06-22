@@ -1,7 +1,5 @@
 import asyncio
 import datetime as dt
-import sys
-import traceback
 
 import discord
 
@@ -10,7 +8,7 @@ import SLA_bot.clock as Clock
 import SLA_bot.config as cf
 import SLA_bot.pso2calendar as PSO2Calendar
 import SLA_bot.pso2escalendar as PSO2esCalendar
-
+import SLA_bot.util as ut
 
 bot = None
 channel_messages = {}
@@ -59,14 +57,13 @@ async def write_content(channel, nth_msg, content):
         del m[nth_msg]
     
 async def updater(contentFunc, nth_msg, interval):
+    async def update_content():
+        content = await contentFunc()
+        for channel in channel_messages:
+            await write_content(channel, nth_msg, content)
+
     while not bot.is_closed:
-        try:
-            content = await contentFunc()
-            for channel in channel_messages:
-                await write_content(channel, nth_msg, content)
-        except Exception:
-            print('Ignored following error:')
-            print(traceback.format_exc(), file=sys.stderr)
+        await ut.try_ignore_errors(update_content)
         await asyncio.sleep(interval)
         
 async def load_channels():

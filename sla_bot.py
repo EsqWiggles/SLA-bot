@@ -1,8 +1,6 @@
 import asyncio
 import datetime as dt
 import os
-import sys
-import traceback
 
 import discord
 from   discord.ext import commands
@@ -37,17 +35,16 @@ bot = commands.Bot(command_prefix=prefix, pm_help=True, description=cs.BOT_HELP)
 
 initialized = False
 
-                   
-async def bot_status(bot):
+async def bot_edit_status(bot):
+    now = dt.datetime.now(dt.timezone.utc)
+    time = now.astimezone(tzone).strftime('%H:%M %Z')
+    status = '{} - {}help'.format(time, prefix)
+    await bot.change_presence(game=discord.Game(name=status)) 
+    
+async def bot_status(bot):        
     while not bot.is_closed:
+        await ut.try_ignore_errors(bot_edit_status, bot)
         now = dt.datetime.now(dt.timezone.utc)
-        try:
-            time = now.astimezone(tzone).strftime('%H:%M %Z')
-            status = '{} - {}help'.format(time, prefix)
-            await bot.change_presence(game=discord.Game(name=status))
-        except Exception:
-            print('Ignored following error:')
-            print(traceback.format_exc(), file=sys.stderr)
         await asyncio.sleep(60 - now.second)
 
 def strfevent(event, ref_time):
