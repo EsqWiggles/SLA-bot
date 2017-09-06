@@ -57,13 +57,13 @@ async def write_content(channel, nth_msg, content):
         del m[nth_msg]
     
 async def updater(contentFunc, nth_msg, interval):
-    async def update_content():
-        content = await contentFunc()
-        for channel in channel_messages:
-            await write_content(channel, nth_msg, content)
-
     while not bot.is_closed:
-        await ut.try_ignore_errors(update_content)
+        try:
+            content = await contentFunc()
+            for channel in channel_messages:
+                await write_content(channel, nth_msg, content)
+        except:
+            ut.print_new_exceptions()
         await asyncio.sleep(interval)
         
 async def load_channels():

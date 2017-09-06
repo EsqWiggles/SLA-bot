@@ -35,15 +35,15 @@ bot = commands.Bot(command_prefix=prefix, pm_help=True, description=cs.BOT_HELP)
 
 initialized = False
 
-async def bot_edit_status(bot):
-    now = dt.datetime.now(dt.timezone.utc)
-    time = now.astimezone(tzone).strftime('%H:%M %Z')
-    status = '{} - {}help'.format(time, prefix)
-    await bot.change_presence(game=discord.Game(name=status)) 
-    
 async def bot_status(bot):        
     while not bot.is_closed:
-        await ut.try_ignore_errors(bot_edit_status, bot)
+        try:
+            now = dt.datetime.now(dt.timezone.utc)
+            time = now.astimezone(tzone).strftime('%H:%M %Z')
+            status = '{} - {}help'.format(time, prefix)
+            await bot.change_presence(game=discord.Game(name=status)) 
+        except:
+            ut.print_new_exceptions()
         now = dt.datetime.now(dt.timezone.utc)
         await asyncio.sleep(60 - now.second)
 

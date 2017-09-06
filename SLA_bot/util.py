@@ -1,23 +1,16 @@
 import collections
 import os
-import traceback
 import sys
+import traceback
 
+known_exceptions = {}
 project_dir = os.path.dirname(os.path.dirname(__file__))
-
-async def try_ignore_errors(func, *args, **kwargs):
-    try:
-        await func(*args, **kwargs)
-    except Exception as e:
-        traceback_stack = traceback.extract_tb(sys.exc_info()[2])
-        stack_index = -1
-        for i, error_data in enumerate(traceback_stack):
-            parent_dir = os.path.dirname(os.path.dirname(error_data[0]))
-            if parent_dir == project_dir:
-                stack_index = i
-        file, line, _, _ = traceback_stack[stack_index]
-        print('Ignored Error from: File "{}", line {}'.format(file, line))
-        print('{}: {}\n'.format(type(e).__name__, e))
+ 
+def print_new_exceptions():
+    stack_trace = str(traceback.extract_tb(sys.exc_info()[2]))
+    if not stack_trace in known_exceptions:
+        known_exceptions[stack_trace] = True
+        traceback.print_exc()
 
 def two_unit_tdelta(tdelta):
     total_s = tdelta.total_seconds()
