@@ -2,7 +2,7 @@ import datetime as dt
 
 import SLA_bot.config as cf
 
-async def fetch():
+async def read():
     header = cf.get('Clock', 'header')
     now = dt.datetime.now(cf.gettimezone('General', 'timezone'))
     hand = now.hour % 12

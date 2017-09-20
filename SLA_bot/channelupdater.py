@@ -19,10 +19,10 @@ async def init(discord_bot):
     global modules
     bot = discord_bot
     modules = [
-        (Clock.fetch, cf.getint('Clock', 'update_interval')),
-        (AlertFeed.fetch, cf.getint('PSO2 Feed', 'update_interval')),
-        (PSO2Calendar.fetch, cf.getint('PSO2 Calendar', 'update_interval')),
-        (PSO2esCalendar.fetch, cf.getint('PSO2es Calendar', 'update_interval')),
+        (Clock.read, cf.getint('Clock', 'update_interval')),
+        (AlertFeed.read, cf.getint('PSO2 Feed', 'update_interval')),
+        (PSO2Calendar.read, cf.getint('PSO2 Calendar', 'update_interval')),
+        (PSO2esCalendar.read, cf.getint('PSO2es Calendar', 'update_interval')),
     ]
     await make_updaters()
 
@@ -62,6 +62,8 @@ async def updater(contentFunc, nth_msg, interval):
             content = await contentFunc()
             for channel in channel_messages:
                 await write_content(channel, nth_msg, content)
+        except asyncio.CancelledError:
+            break
         except:
             ut.print_new_exceptions()
         await asyncio.sleep(interval)

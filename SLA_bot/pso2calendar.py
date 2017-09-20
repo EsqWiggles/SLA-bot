@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import datetime as dt
+import json
 import string
 
 import SLA_bot.config as cf
@@ -12,9 +13,24 @@ counter = {}
 groups = ["Arks League", "Casino Boost"]
 transtable = str.maketrans("", "", string.punctuation + string.whitespace)
 
-async def download(url):
+async def download():
+    now = dt.datetime.now(dt.timezone.utc)
+    max = now + dt.timedelta(days=14)
+    api_key = cf.get('General', 'google_api_key')
+    url = GcalUtil.build_get(id, api_key, now, max)
     async with aiohttp.get(url) as response:
         return await response.json()
+        
+async def update():
+    try:
+        data = await download()
+        global events
+        events = GcalUtil.parse_data(data)
+        events.sort(key=lambda event: event.start)
+        global counter
+        counter = count_events()
+    except json.decoder.JSONDecodeError:
+        pass
 
 def count_events():
     count = {}
@@ -45,23 +61,9 @@ def strfcount():
         lines.append('`x{:>3}` {}'.format(count, name))
     return '\n'.join(lines)
     
-        
-async def update():
-    now = dt.datetime.now(dt.timezone.utc)
-    max = now + dt.timedelta(days=14)
-    api_key = cf.get('General', 'google_api_key')
-    url = GcalUtil.build_get(id, api_key, now, max)
-    data = await download(url)
-    global events
-    events = GcalUtil.parse_data(data)
-    events.sort(key=lambda event: event.start)
-    global counter
-    counter = count_events()
-        
-
-async def fetch():
-    header = cf.get('PSO2 Calendar', 'header')
+async def read():
     await update()
+    header = cf.get('PSO2 Calendar', 'header')
     if not events:
         return '** **\n' + header + '\n\n' + 'No more scheduled events!' + '\n** **'
     now = dt.datetime.now(dt.timezone.utc)
