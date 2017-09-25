@@ -55,27 +55,42 @@ async def write_content(channel, nth_msg, content):
             pass
     except discord.errors.NotFound:
         del m[nth_msg]
-    
-async def updater(contentFunc, nth_msg, interval):
+        
+async def update_messages(interval):
     while not bot.is_closed:
         try:
-            content = await contentFunc()
-            for channel in channel_messages:
-                await write_content(channel, nth_msg, content)
+            for channel, messages in channel_messages.items():
+                for i, message in enumerate(messages):
+                    await write_content(channel, i, str(dt.datetime.now()))
         except asyncio.CancelledError:
             break
         except:
             ut.print_new_exceptions()
         await asyncio.sleep(interval)
-        
+    
 async def load_channels():
     global channel_messages
     channel_messages = {}
     for c in cf.channels():
         chan = bot.get_channel(c)
         channel_messages[chan] = await recycle_messages(chan)
+
+async def updater(updateFunc, interval):
+    while not bot.is_closed:
+        try:
+            await updateFunc()
+        except asyncio.CancelledError:
+            break
+        except:
+            ut.print_new_exceptions()
+        await asyncio.sleep(interval)
         
 async def make_updaters():
     await load_channels()
-    for i, m in enumerate(modules):
-        bot.loop.create_task(updater(m[0], i, m[1]))
+    update_delays = {
+        AlertFeed.update : cf.getint('PSO2 Feed', 'update_interval'),
+        PSO2Calendar.update : cf.getint('PSO2 Calendar', 'update_interval'),
+        PSO2esCalendar.update : cf.getint('PSO2es Calendar', 'update_interval')}
+    for func, delay in update_delays.items():
+        bot.loop.create_task(updater(func, delay))
+    bot.loop.create_task(update_messages(2))
