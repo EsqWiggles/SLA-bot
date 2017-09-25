@@ -28,40 +28,31 @@ async def init(discord_bot):
 
 async def recycle_messages(channel):
     try:
-        messages = bot.logs_from(channel, 100, reverse=True)
-        recycled = []
+        messages = bot.logs_from(channel, 100)
         async for msg in messages:
             if msg.author.id == bot.user.id:
-                recycled.append(msg)
-            else:
-                recycled = []
-            if len(recycled) >= len(modules):
-                break
-        return recycled
+                return msg
     except (discord.errors.Forbidden, discord.errors.NotFound):
-        return []
+        return None
 
-async def write_content(channel, nth_msg, content):
+async def write_content(channel, content):
     global channel_messages
-    m = channel_messages[channel]
-    c = content[:2000]
+    message = channel_messages[channel]
     try:
-        m[nth_msg] = await bot.edit_message(m[nth_msg], c)
-    except IndexError:
-        try:
-            m.append( await bot.send_message(channel, c) )
-            channel_messages[channel] = await recycle_messages(channel)
-        except (discord.errors.Forbidden, discord.errors.NotFound):
-            pass
-    except discord.errors.NotFound:
-        del m[nth_msg]
-        
+        if message == None:
+            channel_messages[channel] = await bot.send_message(channel, content)
+        else: 
+            channel_messages[channel] = await bot.edit_message(message, content)
+    except discord.errors.NotFound: 
+        channel_messages[channel] = None
+    except discord.errors.Forbidden:
+        pass
+
 async def update_messages(interval):
     while not bot.is_closed:
         try:
             for channel, messages in channel_messages.items():
-                for i, message in enumerate(messages):
-                    await write_content(channel, i, str(dt.datetime.now()))
+                await write_content(channel, str(dt.datetime.now()))
         except asyncio.CancelledError:
             break
         except:
