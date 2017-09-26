@@ -35,24 +35,36 @@ async def recycle_messages(channel):
     except (discord.errors.Forbidden, discord.errors.NotFound):
         return None
 
-async def write_content(channel, content):
+async def write_content(channel, content, embed):
     global channel_messages
     message = channel_messages[channel]
     try:
         if message == None:
-            channel_messages[channel] = await bot.send_message(channel, content)
+            channel_messages[channel] = await bot.send_message(channel, content, embed=embed)
         else: 
-            channel_messages[channel] = await bot.edit_message(message, content)
+            channel_messages[channel] = await bot.edit_message(message, content, embed=embed)
     except discord.errors.NotFound: 
         channel_messages[channel] = None
     except discord.errors.Forbidden:
         pass
 
+async def build_message():
+    content = None
+    embed=discord.Embed(title='Title')
+    embed.add_field(name='**Time**', value=await Clock.read(), inline=True)
+    embed.add_field(name='**PSO2**', value=await PSO2Calendar.read(), inline=True)
+    embed.add_field(name='**Alert Feed**', value=await AlertFeed.read(), inline=True)
+    embed.add_field(name='**PSO2es**', value=await PSO2esCalendar.read(), inline=True)
+
+    return (content, embed)
+
+        
 async def update_messages(interval):
     while not bot.is_closed:
         try:
+            content, embed = await build_message()
             for channel, messages in channel_messages.items():
-                await write_content(channel, str(dt.datetime.now()))
+                await write_content(channel, content, embed)
         except asyncio.CancelledError:
             break
         except:
