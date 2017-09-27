@@ -61,8 +61,7 @@ def strfcount():
         lines.append('`x{:>3}` {}'.format(count, name))
     return '\n'.join(lines)
     
-async def read():
-    await update()
+def read():
     header = cf.get('PSO2 Calendar', 'header')
     if not events:
         return 'No more scheduled events!'

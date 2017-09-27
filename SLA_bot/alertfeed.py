@@ -20,8 +20,9 @@ def align_shiplabels(text):
         return '`{}`'.format(matched.group(0))
     return re.sub('^\d\d:(?!\d\d\s)', monospace, text, flags=re.MULTILINE)
         
-async def read():
-    await update()
+def read():
+    if not cache:
+        return '[ ?? JST Emergency Quest Notice ]\nNot found.'
     latest_alert = cache[0]['text']
     if latest_alert.count('\n') >= 10:
         return align_shiplabels(latest_alert) + '\n** **'

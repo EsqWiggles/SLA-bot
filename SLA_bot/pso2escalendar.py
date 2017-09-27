@@ -26,8 +26,7 @@ async def update():
     except json.decoder.JSONDecodeError:
         pass
 
-async def read():
-    await update()
+def read():
     header = cf.get('PSO2es Calendar', 'header')
     if not events:
         return 'No more scheduled events!'

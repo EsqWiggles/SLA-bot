@@ -8,7 +8,7 @@ def update():
     global hand
     hand = hand % 12 + 1
 
-async def read():
+def read():
     tz = cf.gettimezone('General', 'timezone')
     time = dt.datetime.now(tz).strftime('%H:%M %Z')
     return ':clock{}: {}'.format(hand, time)

@@ -50,11 +50,11 @@ async def write_content(channel, content, embed):
 
 async def build_message():
     content = None
-    embed=discord.Embed(title=await Clock.read(), description='** **',  color=0x3e9eff)
-    embed.add_field(name='**PSO2 Schedule**', value=await PSO2Calendar.read(), inline=True)
-    alert_header, alert_body = (await AlertFeed.read()).split('\n', maxsplit=1)
+    embed=discord.Embed(title=Clock.read(), description='** **',  color=0x3e9eff)
+    embed.add_field(name='**PSO2 Schedule**', value=PSO2Calendar.read(), inline=True)
+    alert_header, alert_body = AlertFeed.read().split('\n', maxsplit=1)
     embed.add_field(name=alert_header, value=alert_body, inline=True)
-    embed.add_field(name='**PSO2es**', value=await PSO2esCalendar.read(), inline=True)
+    embed.add_field(name='**PSO2es**', value=PSO2esCalendar.read(), inline=True)
     return (content, embed)
 
         
