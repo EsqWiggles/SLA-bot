@@ -2,12 +2,13 @@ import datetime as dt
 
 import SLA_bot.config as cf
 
+hand = 0
+
+def update():
+    global hand
+    hand = hand % 12 + 1
+
 async def read():
-    header = cf.get('Clock', 'header')
-    now = dt.datetime.now(cf.gettimezone('General', 'timezone'))
-    hand = now.hour % 12
-    hand = 12 if hand == 0 else hand
-    time = now.strftime('%H:%M')
-    date = now.strftime('%Y-%m-%d')
-    s = ":clock{}: **{}**\n:calendar_spiral: `{}`"
-    return '** **\n' + header + '\n' + s.format(hand, time, date) + '\n** **'
+    tz = cf.gettimezone('General', 'timezone')
+    time = dt.datetime.now(tz).strftime('%H:%M %Z')
+    return ':clock{}: {}'.format(hand, time)

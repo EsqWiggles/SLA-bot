@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 
 import aiohttp
 
@@ -14,12 +15,14 @@ async def update():
     except json.decoder.JSONDecodeError:
         pass
 
+def align_shiplabels(text):
+    def monospace(matched):
+        return '`{}`'.format(matched.group(0))
+    return re.sub('^\d\d:(?!\d\d\s)', monospace, text, flags=re.MULTILINE)
+        
 async def read():
     await update()
     latest_alert = cache[0]['text']
-    lines = latest_alert.splitlines()
-    code_color = 'fix' if len(lines) >= 10 else ''
-    header = '-' * len(lines[0])
-    lines.insert(1, header)
-    text = '\n'.join(lines)
-    return '```{}\n{}\n```'.format(code_color, text)
+    if latest_alert.count('\n') >= 10:
+        return align_shiplabels(latest_alert) + '\n** **'
+    return latest_alert + '\n** **'

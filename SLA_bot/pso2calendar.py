@@ -65,11 +65,11 @@ async def read():
     await update()
     header = cf.get('PSO2 Calendar', 'header')
     if not events:
-        return '** **\n' + header + '\n\n' + 'No more scheduled events!' + '\n** **'
+        return 'No more scheduled events!'
     now = dt.datetime.now(dt.timezone.utc)
     max = cf.gettdelta('PSO2 Calendar', 'time_range')
     tzone = cf.gettimezone('General', 'timezone')
     upcoming = [x for x in events if x.start - now < max]
     schedule = GcalUtil.strfcalendar(upcoming, now, tzone)
     summary = strfcount()
-    return '** **\n' + header + '\n\n' + schedule + '\n\n' + summary + '\n** **'
+    return schedule + '\n\n' + summary + '\n** **'

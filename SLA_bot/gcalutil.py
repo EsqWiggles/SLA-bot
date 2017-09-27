@@ -52,10 +52,7 @@ def strfcalendar(events, reference_time, time_zone):
         else:
             status = 'Ended'
         status = '{:>7}'.format(status)
-        
-        s = event.start.astimezone(time_zone).strftime('%H:%M')
-        e = event.end.astimezone(time_zone).strftime('%H:%M')
-        n = event.name
-        l = '`|{:^9}|`  `{} ~ {}`  **{}**'.format(status, s, e, n)
+
+        l = '`|{:^9}|` **{}**'.format(status, event.name)
         lines.append(l)
     return '\n'.join(lines)
