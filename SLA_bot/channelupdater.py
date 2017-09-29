@@ -12,28 +12,21 @@ import SLA_bot.util as ut
 
 bot = None
 channel_messages = {}
-modules = []
 
 async def init(discord_bot):
     global bot
-    global modules
     bot = discord_bot
-    modules = [
-        (Clock.read, cf.getint('Clock', 'update_interval')),
-        (AlertFeed.read, cf.getint('PSO2 Feed', 'update_interval')),
-        (PSO2Calendar.read, cf.getint('PSO2 Calendar', 'update_interval')),
-        (PSO2esCalendar.read, cf.getint('PSO2es Calendar', 'update_interval')),
-    ]
     await make_updaters()
 
 async def recycle_messages(channel):
     try:
         messages = bot.logs_from(channel, 100)
         async for msg in messages:
-            if msg.author.id == bot.user.id:
+            if msg.author.id == bot.user.id and msg.embeds:
                 return msg
     except (discord.errors.Forbidden, discord.errors.NotFound):
         return None
+    return None
 
 async def write_content(channel, content, embed):
     global channel_messages
