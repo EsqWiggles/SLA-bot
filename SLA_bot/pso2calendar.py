@@ -62,7 +62,6 @@ def strfcount():
     return '\n'.join(lines)
     
 def read():
-    header = cf.get('PSO2 Calendar', 'header')
     if not events:
         return 'No more scheduled events!'
     now = dt.datetime.now(dt.timezone.utc)

@@ -89,4 +89,4 @@ async def make_updaters():
         PSO2esCalendar.update : cf.getint('PSO2es Calendar', 'update_interval')}
     for func, delay in update_delays.items():
         bot.loop.create_task(updater(func, delay))
-    bot.loop.create_task(update_messages(2))
+    bot.loop.create_task(update_messages(cf.getint('General', 'channel_update_interval')))

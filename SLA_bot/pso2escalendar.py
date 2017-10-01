@@ -27,7 +27,6 @@ async def update():
         pass
 
 def read():
-    header = cf.get('PSO2es Calendar', 'header')
     if not events:
         return 'No more scheduled events!'
     now = dt.datetime.now(dt.timezone.utc)
