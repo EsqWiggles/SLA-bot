@@ -10,5 +10,6 @@ def update():
 
 def read():
     tz = cf.gettimezone('General', 'timezone')
-    time = dt.datetime.now(tz).strftime('%H:%M %Z')
+    time = dt.datetime.now(tz).strftime('%H:%M %Z - %m/%d')
     return ':clock{}: {}'.format(hand, time)
+    
