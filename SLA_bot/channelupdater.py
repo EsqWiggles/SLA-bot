@@ -8,6 +8,7 @@ import SLA_bot.clock as Clock
 import SLA_bot.config as cf
 import SLA_bot.pso2calendar as PSO2Calendar
 import SLA_bot.pso2escalendar as PSO2esCalendar
+import SLA_bot.pso2summary as PSO2Summary
 import SLA_bot.util as ut
 
 bot = None
@@ -49,6 +50,7 @@ async def build_message():
         embed.add_field(name=alert_header, value=alert_body, inline=True)
     if PSO2Calendar.events:
         embed.add_field(name='**PSO2 Schedule**', value=PSO2Calendar.read(), inline=True)
+        embed.add_field(name='**PSO2 Summary**', value=PSO2Summary.read(), inline=True)
     if PSO2esCalendar.events:
         embed.add_field(name='**PSO2es**', value=PSO2esCalendar.read(), inline=True)
     if not AlertFeed.is_unscheduled():
