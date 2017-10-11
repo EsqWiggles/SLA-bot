@@ -1,4 +1,17 @@
-v0.31 @ 2017-04
+v0.32 @ 2017-10-10
+    - Prevent errors from repeatedly printing in update loops
+    - Combine all channel messages into a single embed based message
+    - Add a bot script to edit an offline bot message
+
+    - Config file changes:
+        - Add "channel_update_interval", the seconds to refresh the messages
+        - Add "embed_color", the hexidecimal color values for the embed
+        - Remove "header" options on all sections
+        - Remove Clock's "update_interval", now updates when the message does
+        - PSO2 Calendar's default increased to 120 seconds
+        - PSO2es Calendar's default increased to 120 seconds
+
+v0.31 @ 2017-04-16
     - Implement a channel message for the PSO2es schedule
     - Reduce cases where the PSO2 schedule was counting events separately
     - Create config file template when no config is found
