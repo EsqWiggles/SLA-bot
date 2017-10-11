@@ -5,8 +5,20 @@ import os
 import discord
 from   discord.ext import commands
 
-import SLA_bot.channelupdater as ChannelUpdater
+
 import SLA_bot.config as cf
+curr_dir = os.path.dirname(__file__)
+default_config = os.path.join(curr_dir, 'default_config.ini'),
+user_config = os.path.join(curr_dir, 'config.ini')
+if not os.path.isfile(user_config):
+    cf.new_config(user_config)
+    print("No config file found. Creating one at:\n{}".format(user_config))
+    print("Please edit the config file and restart the program.")
+    exit()
+cf.load_configs(default_config, user_config)  
+
+
+import SLA_bot.channelupdater as ChannelUpdater
 import SLA_bot.constants as cs
 import SLA_bot.pso2calendar as PSO2Calendar
 import SLA_bot.util as ut
@@ -16,24 +28,10 @@ import SLA_bot.util as ut
 
 VERSION = 0.31
 
-curr_dir = os.path.dirname(__file__)
-default_config = os.path.join(curr_dir, 'default_config.ini'),
-user_config = os.path.join(curr_dir, 'config.ini')
-
-if not os.path.isfile(user_config):
-    cf.new_config(user_config)
-    print("No config file found. Creating one at:\n{}".format(user_config))
-    print("Please edit the config file and restart the program.")
-    exit()
-
-cf.load_configs(default_config, user_config)  
-
 prefix = cf.get('General', 'command_prefix')
 tzone = cf.gettimezone('General', 'timezone')
-
-bot = commands.Bot(command_prefix=prefix, pm_help=True, description=cs.BOT_HELP)
-
 initialized = False
+bot = commands.Bot(command_prefix=prefix, pm_help=True, description=cs.BOT_HELP)
 
 async def bot_status(bot):        
     while not bot.is_closed:
