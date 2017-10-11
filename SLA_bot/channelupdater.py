@@ -13,6 +13,7 @@ import SLA_bot.util as ut
 
 bot = None
 channel_messages = {}
+color = int(cf.get('General', 'embed_color'), 16)
 
 async def init(discord_bot):
     global bot
@@ -44,7 +45,7 @@ async def write_content(channel, content, embed):
 
 async def build_message():
     content = None
-    embed=discord.Embed(title=Clock.read(), description='** **',  color=0x3e9eff)
+    embed=discord.Embed(title=Clock.read(), description='** **',  color=color)
     alert_header, alert_body = AlertFeed.read().split('\n', maxsplit=1)
     if AlertFeed.is_unscheduled():
         embed.add_field(name=alert_header, value=alert_body, inline=True)
