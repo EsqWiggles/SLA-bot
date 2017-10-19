@@ -16,8 +16,9 @@ async def download():
     now = dt.datetime.now(dt.timezone.utc)
     max = now + dt.timedelta(days=14)
     url = GcalUtil.build_get(id, api_key, now, max)
-    async with aiohttp.get(url) as response:
-        return await response.json()
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
         
 async def update():
     try:

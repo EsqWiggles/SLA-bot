@@ -9,9 +9,10 @@ source_url = 'http://pso2emq.flyergo.eu/api/v2/'
 
 async def update():
     try:
-        async with aiohttp.get(source_url) as response:
-            global cache
-            cache = await response.json()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(source_url) as response:
+                global cache
+                cache = await response.json(content_type=None)
     except json.decoder.JSONDecodeError:
         pass
 
