@@ -8,6 +8,7 @@ import SLA_bot.clock as Clock
 import SLA_bot.config as cf
 import SLA_bot.pso2calendar as PSO2Calendar
 import SLA_bot.pso2escalendar as PSO2esCalendar
+import SLA_bot.pso2rss as PSO2RSS
 import SLA_bot.pso2summary as PSO2Summary
 import SLA_bot.util as ut
 
@@ -56,6 +57,7 @@ async def build_message():
         embed.add_field(name='**PSO2es**', value=PSO2esCalendar.read(), inline=True)
     if not AlertFeed.is_unscheduled():
         embed.add_field(name=alert_header, value=alert_body, inline=True)
+    embed.add_field(name='pso2.jp/players', value=PSO2RSS.read(), inline=False)
     return (content, embed)
 
         
@@ -94,7 +96,8 @@ async def make_updaters():
     update_delays = {
         AlertFeed.update : cf.getint('PSO2 Feed', 'update_interval'),
         PSO2Calendar.update : cf.getint('PSO2 Calendar', 'update_interval'),
-        PSO2esCalendar.update : cf.getint('PSO2es Calendar', 'update_interval')}
+        PSO2esCalendar.update : cf.getint('PSO2es Calendar', 'update_interval'),
+        PSO2RSS.update : cf.getint('PSO2 RSS', 'update_interval')}
     for func, delay in update_delays.items():
         bot.loop.create_task(updater(func, delay))
     bot.loop.create_task(update_messages(cf.getint('General', 'channel_update_interval')))
