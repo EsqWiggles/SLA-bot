@@ -31,7 +31,6 @@ async def parse(xml_text):
         if i >= max_items:
             break
         item = match.group()
-        title = strip_tag('title', item)
         link = strip_tag('link', item)
         date = strip_tag('dc:date', item)
         if date:
@@ -40,13 +39,12 @@ async def parse(xml_text):
             date = date.strftime('%m/%d')
         else:
             date = '--/--'
-        if title and link:
-            title = html.unescape(title)
+        if link:
             link = html.unescape(link)
             translate = translate_base + urllib.parse.quote_plus(link)
             shortened = await shorten_url(translate)
             link_name = link.replace(common_url, '')
-            lines.append('`{} {}` [{}]({})'.format(date, i, link_name, shortened))
+            lines.append('`{}` [{}]({})'.format(date, link_name, shortened))
     return '\n'.join(lines)
     
 def strip_tag(tag, text):
