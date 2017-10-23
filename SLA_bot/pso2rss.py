@@ -10,6 +10,7 @@ import SLA_bot.config as cf
 api_key = cf.get('General', 'google_api_key')
 api_url = 'https://www.googleapis.com/urlshortener/v1/url?key=' + api_key
 cache = ''
+common_url = 'http://pso2.jp/players/'
 shorten_url = 'https://www.googleapis.com/urlshortener/v1/url'
 source_url = 'http://pso2.jp/players/pso2news.xml'
 translate_base = 'https://translate.google.com/translate?sl=ja&tl=en&u='
@@ -39,7 +40,8 @@ async def parse(xml_text):
             link = html.unescape(link)
             translate = translate_base + urllib.parse.quote_plus(link)
             shortened = await shorten_url(translate)
-            lines.append('`{}` [Eng]({}) {}'.format(date, shortened, link))
+            link_name = link.replace(common_url, '')
+            lines.append('`{}` [{}]({})'.format(date, link_name, shortened))
     return '\n'.join(lines)
     
 def strip_tag(tag, text):
