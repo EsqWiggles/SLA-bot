@@ -24,11 +24,16 @@ async def update():
 
 async def parse(xml_text):
     items = re.findall('<item.*?>.*?</item>', xml_text, re.DOTALL)
+    items = re.finditer('<item.*?>.*?</item>', xml_text, re.DOTALL)
+    max_items = cf.getint('PSO2 RSS', 'max_items')
     lines= []
-    for i in items:
-        title = strip_tag('title', i)
-        link = strip_tag('link', i)
-        date = strip_tag('dc:date', i)
+    for i, match in enumerate(items):
+        if i >= max_items:
+            break
+        item = match.group()
+        title = strip_tag('title', item)
+        link = strip_tag('link', item)
+        date = strip_tag('dc:date', item)
         if date:
             date = re.sub('(?<=[+-]..):', '', date )
             date = dt.datetime.strptime(date , '%Y-%m-%dT%H:%M:%S%z')
@@ -41,7 +46,7 @@ async def parse(xml_text):
             translate = translate_base + urllib.parse.quote_plus(link)
             shortened = await shorten_url(translate)
             link_name = link.replace(common_url, '')
-            lines.append('`{}` [{}]({})'.format(date, link_name, shortened))
+            lines.append('`{} {}` [{}]({})'.format(date, i, link_name, shortened))
     return '\n'.join(lines)
     
 def strip_tag(tag, text):
