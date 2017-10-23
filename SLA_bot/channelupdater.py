@@ -57,7 +57,7 @@ async def build_message():
         embed.add_field(name='**PSO2es**', value=PSO2esCalendar.read(), inline=True)
     if not AlertFeed.is_unscheduled():
         embed.add_field(name=alert_header, value=alert_body, inline=True)
-    embed.add_field(name='pso2.jp/players', value=PSO2RSS.read(), inline=False)
+    embed.add_field(name='pso2.jp/players/...', value=PSO2RSS.read(), inline=False)
     return (content, embed)
 
         
