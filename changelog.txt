@@ -1,3 +1,12 @@
+v0.33 @ 2017-10-25
+    - Add rss field for pso2.jp/players/
+    - Add rss field for bumped.org/
+    
+    - Config file changes:
+        Add "bumped RSS" and "PSO2 RSS" sections
+            - "max_items" number of RSS entries to parse
+            - "update_interval" delay in seconds before refreshing data
+
 v0.32 @ 2017-10-10
     - Prevent errors from repeatedly printing in update loops
     - Combine all channel messages into a single embed based message
