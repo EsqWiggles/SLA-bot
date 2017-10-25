@@ -4,6 +4,7 @@ import datetime as dt
 import discord
 
 import SLA_bot.alertfeed as AlertFeed
+import SLA_bot.bumpedrss as bumpedRSS
 import SLA_bot.clock as Clock
 import SLA_bot.config as cf
 import SLA_bot.pso2calendar as PSO2Calendar
@@ -55,6 +56,7 @@ async def build_message():
         embed.add_field(name='**PSO2 Summary**', value=PSO2Summary.read(), inline=True)
     if PSO2esCalendar.events:
         embed.add_field(name='**PSO2es**', value=PSO2esCalendar.read(), inline=True)
+    embed.add_field(name='bumped.org', value=bumpedRSS.read(), inline=True)
     if not AlertFeed.is_unscheduled():
         embed.add_field(name=alert_header, value=alert_body, inline=True)
     embed.add_field(name='pso2.jp/players/...', value=PSO2RSS.read(), inline=False)
@@ -95,6 +97,7 @@ async def make_updaters():
     await load_channels()
     update_delays = {
         AlertFeed.update : cf.getint('PSO2 Feed', 'update_interval'),
+        bumpedRSS.update : cf.getint('bumped RSS', 'update_interval'),
         PSO2Calendar.update : cf.getint('PSO2 Calendar', 'update_interval'),
         PSO2esCalendar.update : cf.getint('PSO2es Calendar', 'update_interval'),
         PSO2RSS.update : cf.getint('PSO2 RSS', 'update_interval')}

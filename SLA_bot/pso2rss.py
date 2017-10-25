@@ -24,7 +24,6 @@ async def update():
             cache = await parse(await response.text())
 
 async def parse(xml_text):
-    items = re.findall('<item.*?>.*?</item>', xml_text, re.DOTALL)
     items = re.finditer('<item.*?>.*?</item>', xml_text, re.DOTALL)
     max_items = cf.getint('PSO2 RSS', 'max_items')
     lines= []
