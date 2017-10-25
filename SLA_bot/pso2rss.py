@@ -69,4 +69,4 @@ async def shorten_url(url):
 def read():
     if not cache:
         return '`--/--` Not found.'
-    return (cache + '\n** **')[:1024]
+    return cache[:1024]
