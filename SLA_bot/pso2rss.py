@@ -6,6 +6,7 @@ import re
 import urllib.parse
 
 import SLA_bot.config as cf
+import SLA_bot.util as ut
 
 api_key = cf.get('General', 'google_api_key')
 api_url = 'https://www.googleapis.com/urlshortener/v1/url?key=' + api_key
@@ -31,8 +32,8 @@ async def parse(xml_text):
         if i >= max_items:
             break
         item = match.group()
-        link = strip_tag('link', item)
-        date = strip_tag('dc:date', item)
+        link = ut.strip_tags('link', item)
+        date = ut.strip_tags('dc:date', item)
         if date:
             date = re.sub('(?<=[+-]..):', '', date )
             date = dt.datetime.strptime(date , '%Y-%m-%dT%H:%M:%S%z')
@@ -46,12 +47,7 @@ async def parse(xml_text):
             link_name = link.replace(common_url, '')
             lines.append('`{}` [{}]({})'.format(date, link_name, shortened))
     return '\n'.join(lines)
-    
-def strip_tag(tag, text):
-    reg_exp = '<{}.*?>(.*?)</{}>'.format(tag, tag)
-    matched_group = re.search(reg_exp, text, re.DOTALL).groups()
-    return matched_group[0] if matched_group else ''
-        
+
 async def shorten_url(url):
     global url_cache
     if url in url_cache:

@@ -1,5 +1,6 @@
 import collections
 import os
+import re
 import sys
 import traceback
 
@@ -11,6 +12,11 @@ def print_new_exceptions():
     if not stack_trace in known_exceptions:
         known_exceptions[stack_trace] = True
         traceback.print_exc()
+        
+def strip_tags(tag, text):
+    reg_exp = '<{}.*?>(.*?)</{}>'.format(tag, tag)
+    matched_group = re.search(reg_exp, text, re.DOTALL).groups()
+    return matched_group[0] if matched_group else ''
 
 def two_unit_tdelta(tdelta):
     total_s = tdelta.total_seconds()
