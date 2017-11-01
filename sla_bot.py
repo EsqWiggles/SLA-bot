@@ -27,7 +27,7 @@ import SLA_bot.util as ut
 
 
 
-VERSION = 0.33
+VERSION = 0.34
 
 prefix = cf.get('General', 'command_prefix')
 tzone = cf.gettimezone('General', 'timezone')

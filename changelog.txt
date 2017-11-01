@@ -1,3 +1,10 @@
+v0.34 @ 2017-11-01
+    - Tweak "next" command
+        - Only print events that are ending in 90 minutes
+        - Limit extra events to those 90 minutes away from the nearest event
+    - Fix "find" command not working
+    
+
 v0.33 @ 2017-10-25
     - Add rss field for pso2.jp/players/
     - Add rss field for bumped.org/
