@@ -46,7 +46,13 @@ async def bot_status(bot):
         await asyncio.sleep(60 - now.second)
 
 def strfevent(event, ref_time):
-    td = '{:>7}'.format(ut.two_unit_tdelta(event.start - ref_time))
+    s_tdelta = event.start - ref_time
+    e_tdelta = event.end - ref_time
+    if s_tdelta > dt.timedelta(seconds=0):
+        status = ut.two_unit_tdelta(s_tdelta)
+    elif e_tdelta > dt.timedelta(seconds=0):
+        status = 'End ' + ut.one_unit_tdelta(e_tdelta)
+    td = '{:>7}'.format(status)
     s = event.start.astimezone(tzone).strftime('%b %d, %H:%M')
     e = event.end.astimezone(tzone).strftime('%H:%M %Z')
     return '`|{:^9}|` **{}** @ {} ~ {}'.format(td, event.name, s, e)
@@ -82,16 +88,15 @@ async def find(search='', mode=''):
 @bot.command(help = cs.NEXT_HELP)
 async def next(search='',):
     now = dt.datetime.now(dt.timezone.utc)
-    upcoming = [e for e in PSO2Calendar.events if e.start > now]
-    neighbor_time = dt.timedelta(hours=1)
-    max_neighbors = 4
-    found = [] 
-    for i in range( min(max_neighbors, len(upcoming)) ):
-        if upcoming[i].start - upcoming[0].start <= neighbor_time * i:
-            found.append(upcoming[i])
-        else:
-            break
+    started = [e for e in PSO2Calendar.events if e.start <= now]
+    started = [e for e in started if e.end - now <= dt.timedelta(minutes=30)]
+    previous = [max(started, key=lambda e: e.end)] if started else []
     
+    event_gap = dt.timedelta(minutes = 90)
+    upcoming = [e for e in PSO2Calendar.events if e.start > now]
+    next = [e for e in upcoming if e.start - upcoming[0].start <= event_gap]
+
+    found = previous + next
     if found:
         lines = [strfevent(event, now) for event in found]
         msg = '\n'.join(lines)
