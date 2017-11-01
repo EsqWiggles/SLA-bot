@@ -21,6 +21,7 @@ cf.load_configs(default_config, user_config)
 import SLA_bot.channelupdater as ChannelUpdater
 import SLA_bot.constants as cs
 import SLA_bot.pso2calendar as PSO2Calendar
+import SLA_bot.pso2summary as PSO2Summary
 import SLA_bot.util as ut
 
 
@@ -69,7 +70,8 @@ async def find(search='', mode=''):
             
     if found:
         lines = []
-        for name, count in PSO2Calendar.counter.items():
+        summary = PSO2Summary.count_events(PSO2Calendar.events)
+        for name, count in summary.items():
             if search_lower in name.lower():
                 lines.append('**{}** {}'.format(count, name))
         lines.append('')
