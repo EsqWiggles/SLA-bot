@@ -2,7 +2,7 @@ import asyncio
 import datetime as dt
 import string
 
-import SLA_bot.pso2calendar as PSO2Calendar
+import SLA_bot.module.pso2calendar as PSO2Calendar
 
 groups = ["Arks League", "Casino Boost"]
 transtable = str.maketrans("", "", string.punctuation + string.whitespace)

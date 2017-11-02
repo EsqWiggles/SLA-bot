@@ -3,15 +3,17 @@ import datetime as dt
 
 import discord
 
-import SLA_bot.alertfeed as AlertFeed
-import SLA_bot.bumpedrss as bumpedRSS
-import SLA_bot.clock as Clock
 import SLA_bot.config as cf
-import SLA_bot.pso2calendar as PSO2Calendar
-import SLA_bot.pso2escalendar as PSO2esCalendar
-import SLA_bot.pso2rss as PSO2RSS
-import SLA_bot.pso2summary as PSO2Summary
 import SLA_bot.util as ut
+
+import SLA_bot.module.alertfeed as AlertFeed
+import SLA_bot.module.bumpedrss as bumpedRSS
+import SLA_bot.module.clock as Clock
+import SLA_bot.module.pso2calendar as PSO2Calendar
+import SLA_bot.module.pso2escalendar as PSO2esCalendar
+import SLA_bot.module.pso2rss as PSO2RSS
+import SLA_bot.module.pso2summary as PSO2Summary
+
 
 bot = None
 channel_messages = {}

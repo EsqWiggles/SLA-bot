@@ -17,12 +17,13 @@ if not os.path.isfile(user_config):
     exit()
 cf.load_configs(default_config, user_config)  
 
-
 import SLA_bot.channelupdater as ChannelUpdater
 import SLA_bot.constants as cs
-import SLA_bot.pso2calendar as PSO2Calendar
-import SLA_bot.pso2summary as PSO2Summary
 import SLA_bot.util as ut
+
+import SLA_bot.module.pso2calendar as PSO2Calendar
+import SLA_bot.module.pso2summary as PSO2Summary
+
 
 
 
