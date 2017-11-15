@@ -50,7 +50,6 @@ def load_configs(default, user):
 def new_config(path):
     with open(path, 'w') as file:
         file.write(bare_config)
-    
 
 def reload():
     user_config.read(user_config_path)
@@ -61,6 +60,11 @@ def remove_option(section, option):
 def save():
     with open(user_config_path, 'w') as configfile:
         user_config.write(configfile)
+    
+def section(name):
+    if user_config.has_section(name):
+        return user_config[name]
+    return default_config[name]
     
 def set(section, option, value):
     if not user_config.has_section(section):
