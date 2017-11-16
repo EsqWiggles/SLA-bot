@@ -38,17 +38,19 @@ def strfevents(events):
 
 def count_events(events):
     count = {}
+    for alias in search_alias.values():
+        count[strip(alias)] = Counter(alias, 0)
     for e in events:
         name = e.name
         label = find_label(name)
         if label in count:
             count[label].count += 1
         else:
-            counter_name = name
-            for alias in search_alias.values():
-                if label == strip(alias):
-                    counter_name = alias
-            count[label] = Counter(counter_name, 1)
+            count[label] = Counter(name, 1)  
+    for alias in search_alias.values():
+        label = strip(alias)
+        if label in count and count[label].count <= 0:
+            del count[label]
     return count
     
 def find_label(name):
