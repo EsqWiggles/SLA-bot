@@ -8,6 +8,14 @@ class CalendarEvent:
         self.name = name
         self.start = start
         self.end = end
+        
+    def __eq__(self, other):
+        return (self.name == other.name and self.start == other.start
+               and self.end == other.end)
+               
+    def __hash__(self):
+        return hash((self.name, self.start, self.end))
+
 
 def gtimefdt(date_time):
     return dt.datetime.strftime(date_time, '%Y-%m-%dT%H:%M:%SZ')
