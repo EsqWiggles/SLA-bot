@@ -12,8 +12,9 @@ import datetime as dt
 import pytz
 
 default_config = configparser.ConfigParser(allow_no_value = True)
+default_config_path = ''
 user_config = configparser.ConfigParser(allow_no_value = True)
-user_config_path = 'Path not set'
+user_config_path = ''
 
 bare_config = """[General]
 bot_token = paste Discord bot token here
@@ -60,7 +61,9 @@ def load_configs(default, user):
     """Read the given config file paths into their respective config object."""
     default_config.read(default)
     user_config.read(user)
+    global default_config_path
     global user_config_path
+    default_config_path = default
     user_config_path = user
     
 def new_config(path):
@@ -69,7 +72,8 @@ def new_config(path):
         file.write(bare_config)
 
 def reload():
-    """Re-read the user config."""
+    """Re-read the user and default config."""
+    default_config.read(default_config_path)
     user_config.read(user_config_path)
     
 def remove_option(section, option):
