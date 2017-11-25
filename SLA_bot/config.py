@@ -24,6 +24,8 @@ google_api_key = paste Google api key here
 
 def channels():
     """Return a list of channel IDs as strings from user config."""
+    if 'Channels' not in user_config:
+        return []
     return [x[0] for x in user_config.items('Channels')]
 
 def get(section, option):
