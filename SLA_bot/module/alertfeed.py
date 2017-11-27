@@ -24,18 +24,18 @@ async def update():
         async with aiohttp.ClientSession() as session:
             async with session.get(source_url) as response:
                 global cache
-                cache = await response.json(content_type=None)
-    except json.decoder.JSONDecodeError:
+                data = await response.json(content_type=None)
+                cache = data[0]['text']
+    except (json.decoder.JSONDecodeError, IndexError, KeyError) as e:
         pass
 
 def read():
     """Return the string of the most recent announcement."""
     if not cache:
         return '[ ?? JST Emergency Quest Notice ]\nNot found.'
-    latest_alert = cache[0]['text']
     if is_unscheduled():
-        return align_shiplabels(latest_alert) + '\n** **'
-    return latest_alert + '\n** **'
+        return align_shiplabels(cache) + '\n** **'
+    return cache + '\n** **'
 
 def is_unscheduled():
     """Return whether the last announcement looks like an unscheduled event."""
@@ -46,7 +46,7 @@ def is_unscheduled():
     # most likely a time label, like 13:00 Event Name, instead of a ship label.
     if not cache:
         return True
-    return len(re.findall('^\d\d:(?!\d\d\s)', cache[0]['text'], flags=re.MULTILINE)) >= 3
+    return len(re.findall('^\d\d:(?!\d\d\s)', cache, flags=re.MULTILINE)) >= 3
 
 def align_shiplabels(text):
     """Return the announcement with the ship labels aligned."""
