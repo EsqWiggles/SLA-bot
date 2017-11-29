@@ -12,10 +12,34 @@ class CalendarEvent:
     def __eq__(self, other):
         return (self.name == other.name and self.start == other.start
                and self.end == other.end)
-               
+        
     def __hash__(self):
         return hash((self.name, self.start, self.end))
-
+        
+    def status(self, reference_time):
+        z_tdelta = dt.timedelta(seconds=0)
+        s_tdelta = self.start - reference_time if self.start else z_tdelta
+        e_tdelta = self.end - reference_time if self.end else z_tdelta
+        if s_tdelta > z_tdelta:
+            return ut.two_unit_tdelta(s_tdelta)
+        if e_tdelta > z_tdelta:
+            return 'End ' + ut.one_unit_tdelta(e_tdelta)
+        return 'Ended'
+        
+    def time_range(self, tz):
+        if self.start and self.end:
+            start = self.start.astimezone(tz).strftime('%b %d, %H:%M')
+            if self.end - self.start <= dt.timedelta(hours=23):
+                end = self.end.astimezone(tz).strftime('%H:%M %Z')
+            else:
+                end = self.end.astimezone(tz).strftime('%b %d, %H:%M %Z')
+            return '{} ~ {}'.format(start, end)
+        if self.start:
+            return self.start.astimezone(tz).strftime('%b %d, %H:%M %Z')
+        if self.end:
+            return self.end.astimezone(tz).strftime('%b %d, ??:?? ~ %H:%M %Z')
+        return ''
+        
 
 def gtimefdt(date_time):
     return dt.datetime.strftime(date_time, '%Y-%m-%dT%H:%M:%SZ')
