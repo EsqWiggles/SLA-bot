@@ -48,16 +48,9 @@ async def bot_status(bot):
         await asyncio.sleep(60 - now.second)
 
 def strfevent(event, ref_time):
-    s_tdelta = event.start - ref_time
-    e_tdelta = event.end - ref_time
-    if s_tdelta > dt.timedelta(seconds=0):
-        status = ut.two_unit_tdelta(s_tdelta)
-    elif e_tdelta > dt.timedelta(seconds=0):
-        status = 'End ' + ut.one_unit_tdelta(e_tdelta)
-    td = '{:>7}'.format(status)
-    s = event.start.astimezone(tzone).strftime('%b %d, %H:%M')
-    e = event.end.astimezone(tzone).strftime('%H:%M %Z')
-    return '`|{:^9}|` **{}** @ {} ~ {}'.format(td, event.name, s, e)
+    status = '{:>7}'.format(event.status(ref_time))
+    range = event.time_range(tzone)
+    return '`|{:^9}|` **{}** @ {}'.format(status, event.name, range)
 
 @bot.command(help = cs.FIND_HELP)
 async def find(search='', mode=''):

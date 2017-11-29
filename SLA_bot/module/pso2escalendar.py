@@ -34,4 +34,6 @@ def read():
         return 'No more scheduled events!'
     now = dt.datetime.now(dt.timezone.utc)
     upcoming = [x for x in events if x.start - now < time_range]
-    return GcalUtil.strfcalendar(upcoming, now, tz)
+    return GcalUtil.statusfevents(upcoming, now) + '\n** **'
+
+

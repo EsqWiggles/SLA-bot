@@ -71,20 +71,11 @@ def build_get(cal_id, key, end_min=None, start_max=None):
     url = 'https://www.googleapis.com/calendar/v3/calendars/{}/events?'
     params = urllib.parse.urlencode(query)
     return url.format(urllib.parse.quote_plus(cal_id)) + params
-
-def strfcalendar(events, reference_time, time_zone):
+    
+def statusfevents(events, reference_time):
     lines = []
-    for event in events:
-        s_tdelta = event.start - reference_time
-        e_tdelta = event.end - reference_time
-        if s_tdelta > dt.timedelta(seconds=0):
-            status = ut.two_unit_tdelta(s_tdelta)
-        elif e_tdelta > dt.timedelta(seconds=0):
-            status = 'End ' + ut.one_unit_tdelta(e_tdelta)
-        else:
-            status = 'Ended'
-        status = '{:>7}'.format(status)
-
-        l = '`|{:^9}|` **{}**'.format(status, event.name)
-        lines.append(l)
+    for e in events:
+        status = '{:>7}'.format(e.status(reference_time))
+        lines.append('`|{:^9}|` **{}**'.format(status, e.name))
     return '\n'.join(lines)
+
