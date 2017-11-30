@@ -1,3 +1,11 @@
+"""RSS feed for pso2.jp
+
+Scrape RSS feed from pso2.jp/players/ and convert it into markdown links to
+Google translated links of the RSS URLs.
+
+Attributes:
+    cache: String of the last parsed RSS data
+"""
 import aiohttp
 import asyncio
 import datetime as dt
@@ -8,9 +16,10 @@ import urllib.parse
 import SLA_bot.config as cf
 import SLA_bot.util as ut
 
+cache = ''
+
 api_key = cf.get('General', 'google_api_key')
 api_url = 'https://www.googleapis.com/urlshortener/v1/url?key=' + api_key
-cache = ''
 common_url = 'http://pso2.jp/players/'
 shorten_url = 'https://www.googleapis.com/urlshortener/v1/url'
 source_url = 'http://pso2.jp/players/pso2news.xml'
@@ -18,12 +27,14 @@ translate_base = 'https://translate.google.com/translate?sl=ja&tl=en&u='
 url_cache = {}
 
 async def update():
+    """Return RSS data as XML string."""
     async with aiohttp.ClientSession() as session:
         async with session.get(source_url) as response:
             global cache
             cache = await parse(await response.text())
 
 async def parse(xml_text):
+    """Parse the xml into string of date and clickable URL lines."""
     items = re.finditer('<item.*?>.*?</item>', xml_text, re.DOTALL)
     max_items = cf.getint('PSO2 RSS', 'max_items')
     lines= []
@@ -48,6 +59,8 @@ async def parse(xml_text):
     return '\n'.join(lines)
 
 async def shorten_url(url):
+    """Return and store a shortened url for future calls."""
+    #Shorten long translate URLs to fit under 1024 character limit
     global url_cache
     if url in url_cache:
         return url_cache[url]
@@ -62,6 +75,7 @@ async def shorten_url(url):
             return None
 
 def read():
+    """Return the last parsed RSS data."""
     if not cache:
         return '`--/--` Not found.'
     return cache[:1024]
