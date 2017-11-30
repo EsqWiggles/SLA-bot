@@ -1,3 +1,11 @@
+"""Count the number of each scheduled PSO2 event
+
+Counts events from pso2calendar.py, normalizing the string to reduce the rate
+of error caused by human typos of the same name in the calendar.
+
+Attributes:
+    cache: String of the counted events
+"""
 import asyncio
 import collections
 import copy
@@ -8,17 +16,20 @@ import SLA_bot.config as cf
 import SLA_bot.module.pso2calendar as PSO2Calendar
 
 cache = ''
-counted_events = []
+counted_events = [] #previous list of events that were counted
 
 transtable = str.maketrans("", "", string.punctuation + string.whitespace)
 def strip(s):
+    """Return the string in lowercase without punctuations."""
     return s.translate(transtable).lower()
 
+#Searching is on stripped names, so store searches as stripped too
 search_alias = collections.OrderedDict()
 for substring, alias in cf.section('PSO2 Summary').items():
     search_alias[strip(substring)] = alias
 
 def read():
+    """Recount the events if necesarry and return the counts as a string."""
     now = dt.datetime.now(dt.timezone.utc)
     events = [x for x in PSO2Calendar.events if x.end > now]
     if not events:
@@ -32,6 +43,7 @@ def read():
     return cache
 
 def strfcount(name_count):
+    """Return the dictionary of events and their count as a string."""
     lines = []
     c_width = len(str(max(name_count.values())))
     data = sorted(name_count.items(), key=lambda x: x[0])
@@ -40,6 +52,7 @@ def strfcount(name_count):
     return '\n'.join(lines)
 
 def count_events(events):
+    """Return the count of events as a dictionary of name -> count number."""
     label_firstname = {}
     name_count = {}
     for e in events:
