@@ -1,3 +1,12 @@
+"""List PSO2 event schedule
+
+Download, store, and list PSO2's schedule. Update at least once before reading.
+
+Attributes:
+    events: List of CalendarEvents from last update() call. This may still
+        contain events that have already ended.
+"""
+
 import aiohttp
 import asyncio
 import datetime as dt
@@ -6,13 +15,16 @@ import json
 import SLA_bot.config as cf
 import SLA_bot.gcalutil as GcalUtil
 
-id = 'pso2emgquest@gmail.com'
 events = []
+
 api_key = cf.get('General', 'google_api_key')
+id = 'pso2emgquest@gmail.com' #id of the google calendar, not the whole URL
 time_range = cf.gettdelta('PSO2 Calendar', 'time_range')
 tz = cf.gettimezone('General', 'timezone')
 
 async def download():
+    """Return json data of events that start or end between now and 14 days."""
+    #Almost all schedules span 1~2 week, but add a max to avoid human errors.
     now = dt.datetime.now(dt.timezone.utc)
     max = now + dt.timedelta(days=14)
     url = GcalUtil.build_get(id, api_key, now, max)
@@ -21,6 +33,7 @@ async def download():
             return await response.json()
         
 async def update():
+    """Calls download(), parses the data, and stores it in events."""
     try:
         data = await download()
         global events
@@ -30,6 +43,7 @@ async def update():
         pass
 
 def read():
+    """Return the list of events that have not started or ended as a string."""
     if not events:
         return 'No more scheduled events!'
     now = dt.datetime.now(dt.timezone.utc)
