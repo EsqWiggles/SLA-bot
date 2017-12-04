@@ -23,9 +23,11 @@ def print_new_exceptions():
         Do not use this if data on the frequency of a particular error is
         desired. If the error is known, please handle it properly!
     """
+    global known_exceptions
     stack_trace = str(traceback.extract_tb(sys.exc_info()[2]))
     if not stack_trace in known_exceptions:
-        #todo:clear dictionary at some length to avoid hogging memory
+        if len(known_exceptions) >= 1000:
+            known_exceptions.clear()
         known_exceptions[stack_trace] = True
         traceback.print_exc()
         
