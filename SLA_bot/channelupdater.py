@@ -1,3 +1,9 @@
+"""Update modules and channel messages.
+
+Manage the update of modules and compile their text into one big message to
+send to the configured Discord channels.
+"""
+
 import asyncio
 import datetime as dt
 
@@ -5,7 +11,6 @@ import discord
 
 import SLA_bot.config as cf
 import SLA_bot.util as ut
-
 import SLA_bot.module.alertfeed as AlertFeed
 import SLA_bot.module.bumpedrss as bumpedRSS
 import SLA_bot.module.clock as Clock
@@ -20,11 +25,22 @@ channel_messages = {}
 color = int(cf.get('General', 'embed_color'), 16)
 
 async def init(discord_bot):
+    """Load module updaters onto the bot loop. Call once."""
     global bot
     bot = discord_bot
     await make_updaters()
 
 async def recycle_messages(channel):
+    """Return the last message sent by this bot in the channel.
+    
+    Only searches the last 100 messages in the channel.
+    
+    Args:
+        channel (str): ID of the channel to search in.
+    
+    Returns:
+        A Message object of the last message sent by this bot or None.
+    """
     try:
         messages = bot.logs_from(channel, 100)
         async for msg in messages:
@@ -35,6 +51,16 @@ async def recycle_messages(channel):
     return None
 
 async def write_content(channel, content, embed):
+    """Send the content with the embed into the channel.
+    
+    Edit the last known message if one is found, otherwise send a new message.
+    
+    Args:
+        channel (str): ID of the channel to write into.
+        content (str): Plain text of the message to be sent.
+        embed (Embed): discord.Embed object to send with the content.
+    
+    """
     global channel_messages
     message = channel_messages[channel]
     try:
@@ -48,6 +74,7 @@ async def write_content(channel, content, embed):
         pass
 
 async def build_message():
+    """Return the compiled text of the modules as a content and embed tuple."""
     content = None
     embed=discord.Embed(title=Clock.read(), description='** **',  color=color)
     alert_header, alert_body = AlertFeed.read().split('\n', maxsplit=1)
@@ -66,6 +93,7 @@ async def build_message():
 
         
 async def update_messages(interval):
+    """Start Loop to send newly built message every interval seconds."""
     while not bot.is_closed:
         try:
             Clock.update()
@@ -79,6 +107,7 @@ async def update_messages(interval):
         await asyncio.sleep(interval)
     
 async def load_channels():
+    """Load the channel IDs from config."""
     global channel_messages
     channel_messages = {}
     for c in cf.channels():
@@ -86,6 +115,7 @@ async def load_channels():
         channel_messages[chan] = await recycle_messages(chan)
 
 async def updater(updateFunc, interval):
+    """Create an update loop to call updateFunc every interval seconds."""
     while not bot.is_closed:
         try:
             await updateFunc()
@@ -96,6 +126,7 @@ async def updater(updateFunc, interval):
         await asyncio.sleep(interval)
         
 async def make_updaters():
+    """Create and load the module and channel updaters into the bot loop."""
     await load_channels()
     update_delays = {
         AlertFeed.update : cf.getint('PSO2 Feed', 'update_interval'),
