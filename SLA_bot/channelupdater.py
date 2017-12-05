@@ -38,10 +38,10 @@ async def make_updaters():
         bumpedRSS.update : cf.getint('bumped RSS', 'update_interval'),
         PSO2Calendar.update : cf.getint('PSO2 Calendar', 'update_interval'),
         PSO2esCal.update : cf.getint('PSO2es Calendar', 'update_interval'),
-        PSO2RSS.update : cf.getint('PSO2 RSS', 'update_interval')}
+        PSO2RSS.update : cf.getint('PSO2 RSS', 'update_interval'),
+        update_messages : cf.getint('General', 'channel_update_interval')}
     for func, delay in update_delays.items():
         bot.loop.create_task(updater(func, delay))
-    bot.loop.create_task(update_messages(cf.getint('General', 'channel_update_interval')))
 
 async def load_channels():
     """Load the channel IDs from config."""
@@ -71,25 +71,19 @@ async def recycle_messages(channel):
         return None
     return None
 
+async def update_messages():
+    """Build a new message and send it to all the channels."""
+    #Clock does not use external source so just update every message
+    Clock.update()
+    content, embed = await build_message()
+    for channel, messages in channel_messages.items():
+        await write_content(channel, content, embed)
+    
 async def updater(updateFunc, interval):
     """Create an update loop to call updateFunc every interval seconds."""
     while not bot.is_closed:
         try:
             await updateFunc()
-        except asyncio.CancelledError:
-            break
-        except:
-            ut.print_new_exceptions()
-        await asyncio.sleep(interval)
-
-async def update_messages(interval):
-    """Start Loop to send newly built message every interval seconds."""
-    while not bot.is_closed:
-        try:
-            Clock.update()
-            content, embed = await build_message()
-            for channel, messages in channel_messages.items():
-                await write_content(channel, content, embed)
         except asyncio.CancelledError:
             break
         except:
@@ -140,4 +134,3 @@ async def write_content(channel, content, embed):
         channel_messages[channel] = None
     except discord.errors.Forbidden:
         pass
-
