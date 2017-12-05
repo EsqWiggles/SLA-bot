@@ -32,7 +32,7 @@ async def parse(xml_text):
         if i >= max_items:
             break
         item = match.group()
-        title = ut.strip_tags('title', item)
+        title = html.unescape(ut.strip_tags('title', item))
         link = ut.strip_tags('link', item)
         date = ut.strip_tags('pubDate', item)
         if date:
