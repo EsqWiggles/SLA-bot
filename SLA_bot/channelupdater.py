@@ -15,7 +15,7 @@ import SLA_bot.module.alertfeed as AlertFeed
 import SLA_bot.module.bumpedrss as bumpedRSS
 import SLA_bot.module.clock as Clock
 import SLA_bot.module.pso2calendar as PSO2Calendar
-import SLA_bot.module.pso2escalendar as PSO2esCalendar
+import SLA_bot.module.pso2escalendar as PSO2esCal
 import SLA_bot.module.pso2rss as PSO2RSS
 import SLA_bot.module.pso2summary as PSO2Summary
 
@@ -37,7 +37,7 @@ async def make_updaters():
         AlertFeed.update : cf.getint('PSO2 Feed', 'update_interval'),
         bumpedRSS.update : cf.getint('bumped RSS', 'update_interval'),
         PSO2Calendar.update : cf.getint('PSO2 Calendar', 'update_interval'),
-        PSO2esCalendar.update : cf.getint('PSO2es Calendar', 'update_interval'),
+        PSO2esCal.update : cf.getint('PSO2es Calendar', 'update_interval'),
         PSO2RSS.update : cf.getint('PSO2 RSS', 'update_interval')}
     for func, delay in update_delays.items():
         bot.loop.create_task(updater(func, delay))
@@ -102,16 +102,16 @@ async def build_message():
     embed=discord.Embed(title=Clock.read(), description='** **',  color=color)
     alert_header, alert_body = AlertFeed.read().split('\n', maxsplit=1)
     if AlertFeed.is_unscheduled():
-        embed.add_field(name=alert_header, value=alert_body, inline=True)
+        embed.add_field(name=alert_header, value=alert_body)
     if PSO2Calendar.events:
-        embed.add_field(name='**PSO2 Schedule**', value=PSO2Calendar.read(), inline=True)
-        embed.add_field(name='**PSO2 Summary**', value=PSO2Summary.read(), inline=True)
-    if PSO2esCalendar.events:
-        embed.add_field(name='**PSO2es**', value=PSO2esCalendar.read(), inline=True)
-    embed.add_field(name='bumped.org', value=bumpedRSS.read(), inline=True)
+        embed.add_field(name='**PSO2 Schedule**', value=PSO2Calendar.read())
+        embed.add_field(name='**PSO2 Summary**', value=PSO2Summary.read())
+    if PSO2esCal.events:
+        embed.add_field(name='**PSO2es**', value=PSO2esCal.read())
+    embed.add_field(name='bumped.org', value=bumpedRSS.read(), inline=False)
     if not AlertFeed.is_unscheduled():
-        embed.add_field(name=alert_header, value=alert_body, inline=True)
-    embed.add_field(name='pso2.jp/players/...', value=PSO2RSS.read(), inline=False)
+        embed.add_field(name=alert_header, value=alert_body)
+    embed.add_field(name='pso2.jp/players/...', value=PSO2RSS.read())
     return (content, embed)
         
 async def write_content(channel, content, embed):
@@ -129,9 +129,13 @@ async def write_content(channel, content, embed):
     message = channel_messages[channel]
     try:
         if message == None:
-            channel_messages[channel] = await bot.send_message(channel, content, embed=embed)
+            channel_messages[channel] = (
+                await bot.send_message(channel,content, embed=embed)
+            )
         else: 
-            channel_messages[channel] = await bot.edit_message(message, content, embed=embed)
+            channel_messages[channel] = (
+                await bot.edit_message(message, content, embed=embed)
+            )
     except discord.errors.NotFound: 
         channel_messages[channel] = None
     except discord.errors.Forbidden:
