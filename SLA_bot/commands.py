@@ -69,16 +69,16 @@ class UserCommands:
     async def next(self, search='',):
         """Send a message with the current and next event."""
         now = dt.datetime.now(dt.timezone.utc)
-        quest_length = dt.timedelta(minutes=30)
-        started = [e for e in PSO2Calendar.events if e.start <= now]
-        ongoing = [e for e in started if e.end - now <= quest_length]
-        previous = [max(started, key=lambda e: e.end)] if started else []
+        events =  PSO2Calendar.events
+        ongoing = [e for e in events if e.start <= now and e.end > now]
+        #filter out calendar entries that last for an entire day
+        ending = [e for e in ongoing if e.end - now >= dt.timedelta(hours=2)]
+        current = [max(ending, key=lambda e: e.end)] if ending else []
         
         event_gap = dt.timedelta(minutes = 90)
-        later = [e for e in PSO2Calendar.events if e.start > now]
+        later = [e for e in events if e.start > now]
         next = [e for e in later if e.start - later[0].start <= event_gap]
-
-        found = previous + next
+        found = current + next
         if found:
             lines = [strfevent(event, now) for event in found]
             msg = '\n'.join(lines)
