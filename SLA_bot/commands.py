@@ -1,8 +1,12 @@
+"""Load user commands onto the bot.
+
+To add these commands to the bot, create one instance of UserCommands passing
+in the bot object, then add it as a cog. For example, if x is the bot object
+then, x.add_cog(UserCommands(x)).
+"""
 import asyncio
 import datetime as dt
-import os
 
-import discord
 from   discord.ext import commands
 
 import SLA_bot.channelupdater as ChannelUpdater
@@ -13,6 +17,16 @@ import SLA_bot.module.pso2summary as PSO2Summary
 
 tzone = cf.gettimezone('General', 'timezone')
 def strfevent(event, ref_time):
+    """Return the event's status, name, and time range as a string.
+    
+    The status is "##x ##y" (starts in), "End ##x", or "Ended".
+    
+    Args:
+        event (CalendarEvent): The event to display information from.
+        ref_time (datetime): What the event status is at this time.
+    Returns:
+        A string in the form, |status| name start ~ end
+    """
     status = '{:>7}'.format(event.status(ref_time))
     range = event.time_range(tzone)
     return '`|{:^9}|` **{}** @ {}'.format(status, event.name, range)
@@ -23,6 +37,7 @@ class UserCommands:
 
     @commands.command(help = cs.FIND_HELP)
     async def find(self, search='', mode=''):
+        """Send a message with the future events matching the search."""
         now = dt.datetime.now(dt.timezone.utc) 
         lsearch = search.lower()
         found = [x for x in PSO2Calendar.events if lsearch in x.name.lower()]
@@ -52,6 +67,7 @@ class UserCommands:
 
     @commands.command(help = cs.NEXT_HELP)
     async def next(self, search='',):
+        """Send a message with the current and next event."""
         now = dt.datetime.now(dt.timezone.utc)
         quest_length = dt.timedelta(minutes=30)
         started = [e for e in PSO2Calendar.events if e.start <= now]
@@ -72,6 +88,7 @@ class UserCommands:
 
     @commands.command(pass_context=True, no_pm=True, help = cs.TOGGLE_HELP)
     async def toggle(ctx):
+        """Subscribe/unsubscribe current channel to automated messages."""
         perm = ctx.message.channel.permissions_for(ctx.message.author)
         if perm.manage_channels:
             id = ctx.message.channel.id
