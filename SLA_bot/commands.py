@@ -24,6 +24,7 @@ def strfevent(event, ref_time):
     Args:
         event (CalendarEvent): The event to display information from.
         ref_time (datetime): What the event status is at this time.
+    
     Returns:
         A string in the form, |status| name start ~ end
     """
@@ -41,26 +42,19 @@ class UserCommands:
         now = dt.datetime.now(dt.timezone.utc) 
         lsearch = search.lower()
         found = [x for x in PSO2Calendar.events if lsearch in x.name.lower()]
-        num_found = len(found)
         max = cf.getint('General', 'max_find')
-        if mode != 'all':
-            found = found[:max]
-                
+        
+        summary = PSO2Summary.strfcount(PSO2Summary.count_events(found)) 
         if found:
-            lines = []
-            summary = PSO2Summary.count_events(PSO2Calendar.events)
-            for name, count in summary.items():
-                if lsearch in name.lower():
-                    lines.append('**{}** {}'.format(count, name))
-            lines.append('')
-            lines.extend([strfevent(event, now) for event in found])
-            if len(found) < num_found:
-                lines.append('...')
-            msg = '\n'.join(lines)
+            trimmed = found if mode == 'all' else found[:max]
+            events = '\n'.join([strfevent(event, now) for event in trimmed])
+            msg = '{}\n\n{}'.format(summary, events)
+            if len(trimmed) < len(found):
+                msg += '\n...'
         else:
-            msg = 'No scheduled "{}" found.'.format(search or 'events') 
+            msg = 'No scheduled "{}" found.'.format(search or 'events')
             
-        if len(found) > max:
+        if found and len(trimmed) > max:
             await self.bot.whisper(msg[:2000])
         else:
             await self.bot.say(msg[:2000])

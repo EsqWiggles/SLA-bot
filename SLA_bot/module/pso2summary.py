@@ -39,11 +39,13 @@ def read():
     global counted_events
     if counted_events != events or not cache:
         counted_events = copy.copy(events)
-        cache = strfcount(count_events(events)) + '\n** **'
+        cache = strfcount(count_events(events, search_alias)) + '\n** **'
     return cache
 
 def strfcount(name_count):
     """Return the dictionary of events and their count as a string."""
+    if not name_count:
+        return ''
     lines = []
     c_width = len(str(max(name_count.values())))
     data = sorted(name_count.items(), key=lambda x: x[0])
@@ -51,8 +53,19 @@ def strfcount(name_count):
         lines.append('`x {:{width}d}` {}'.format(count, name, width=c_width))
     return '\n'.join(lines)
 
-def count_events(events):
-    """Return the count of events as a dictionary of name -> count number."""
+def count_events(events, aliases={}):
+    """Return the count of events as a dictionary of name -> count number.
+    
+    Count the events by name or partially and sorting them into an alias.
+    Ignore whitespace and punctuation in the event name but not in aliases.
+    
+        Args:
+            events (list): CalendarEvents to count.
+            aliases: orignal -> new name dictionary. Strip the keys.
+            
+        Returns:
+            A dictionary with the name of the event and the number of them.
+    """
     label_firstname = {}
     name_count = {}
     for e in events:
@@ -61,7 +74,7 @@ def count_events(events):
         if label in label_firstname:
             name_count[label_firstname[label]] += 1
         else:
-            for search, alias in search_alias.items():
+            for search, alias in aliases.items():
                 if search in label:
                     name = alias
                     break
