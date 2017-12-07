@@ -107,10 +107,13 @@ def one_unit_tdelta(tdelta):
     units['w'] = total_s/(60*60*24*7)
     units['d'] = total_s/(60*60*24)
     units['h'] = total_s/(60*60)
+    units['m'] = total_s/(60)
     for unit, value in units.items():
         if value < 1:
             continue
+        if units == 'm' and value >= 10:
+            return '{}{}'.format(math.ceil(value), unit)
         if value < 100:
             return '{:.2g}{}'.format(value, unit)
         return '{}{}'.format(round(value), unit)
-    return '{}{}'.format(math.ceil(total_s/(60)), 'm')
+    return '{}{}'.format(math.ceil(units['m']), 'm')
