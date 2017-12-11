@@ -112,6 +112,8 @@ def gtimepdt(time_string):
 def parse_data(json_data):
     """Return list of CalendarEvents from the JSON data."""
     events = []
+    if not json_data:
+        return []
     for item in json_data['items']:
         n = item['summary']
         s = gtimepdt(item['start']['dateTime'])
