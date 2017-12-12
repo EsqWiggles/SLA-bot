@@ -86,7 +86,7 @@ async def updater(updateFunc, interval):
             await updateFunc()
         except asyncio.CancelledError:
             break
-        except:
+        except Exception:
             ut.print_new_exceptions()
         await asyncio.sleep(interval)
 

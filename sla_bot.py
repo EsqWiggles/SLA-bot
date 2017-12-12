@@ -52,7 +52,7 @@ async def bot_status(bot):
             time = now.astimezone(tzone).strftime('%H:%M %Z')
             status = '{} - {}help'.format(time, prefix)
             await bot.change_presence(game=discord.Game(name=status)) 
-        except:
+        except Exception:
             ut.print_new_exceptions()
         now = dt.datetime.now(dt.timezone.utc)
         await asyncio.sleep(60 - now.second)
