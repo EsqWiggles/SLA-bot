@@ -30,7 +30,9 @@ def print_new_exceptions():
         if len(known_exceptions) >= 1000:
             known_exceptions.clear()
         known_exceptions[stack_trace] = True
+        print('---- Ignored following error: ----', file=sys.stderr)
         traceback.print_exc()
+        print('--------\n', file=sys.stderr)
         
 def strip_tags(tag, text):
     """Return the string inside the give tag of the HTML/XML text.
