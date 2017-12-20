@@ -1,7 +1,10 @@
 """Miscellaneous utiliy functions
 """
 
+import aiohttp
+import asyncio
 import collections
+import datetime as dt
 import math
 import os
 import re
@@ -10,7 +13,15 @@ import traceback
 
 known_exceptions = {}
 project_dir = os.path.dirname(os.path.dirname(__file__))
- 
+
+GetErrors = (aiohttp.ClientConnectorError, aiohttp.ClientOSError, 
+            aiohttp.ClientPayloadError, asyncio.TimeoutError)
+
+def note(message):
+    localtime = dt.datetime.now(dt.timezone.utc).astimezone()
+    #localtime.isoformat(timespec=seconds)) python v3.6
+    print('[{}] {}'.format(localtime.strftime('%Y-%m-%dT%H:%M:%S%z'), message))
+
 def print_new_exceptions():
     """Print only new exceptions that this function has not processed.
     
