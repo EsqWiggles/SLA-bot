@@ -14,6 +14,7 @@ import json
 
 import SLA_bot.config as cf
 import SLA_bot.gcalutil as GcalUtil
+import SLA_bot.util as ut
 
 events = []
 
@@ -34,12 +35,15 @@ async def download(cal_id):
     now = dt.datetime.now(dt.timezone.utc)
     max = now + dt.timedelta(days=14)
     url = GcalUtil.build_get(cal_id, api_key, now, max)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            try:
-                return await response.json()
-            except json.decoder.JSONDecodeError:
-                return {}
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                    return await response.json()
+    except ut.GetErrors as e:
+        ut.note('Failed to GET: ' + url)
+    except json.decoder.JSONDecodeError:
+        ut.note('Unexpected data format from: ' + url)
+        return {}
 
 def read():
     """Return the list of events that have not started or ended as a string."""

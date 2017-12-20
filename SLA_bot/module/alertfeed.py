@@ -9,11 +9,12 @@ and store it for later reads. Update at least once before reading.
 # other alternatives can be found, then this will fall back to using twitter
 # bot at https://twitter.com/pso2_emg_hour and translating it.
 
+import aiohttp
 import asyncio
 import json
 import re
 
-import aiohttp
+import SLA_bot.util as ut
 
 cache = ''
 source_url = 'http://pso2emq.flyergo.eu/api/v2/'
@@ -26,8 +27,10 @@ async def update():
                 global cache
                 data = await response.json(content_type=None)
                 cache = data[0]['text']
+    except ut.GetErrors as e:
+        ut.note('Failed to GET: ' + source_url)
     except (json.decoder.JSONDecodeError, IndexError, KeyError) as e:
-        pass
+        ut.note('Unexpected data format from: ' + source_url)
 
 def read():
     """Return the string of the most recent announcement."""

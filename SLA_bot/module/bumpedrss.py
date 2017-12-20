@@ -18,10 +18,13 @@ source_url = 'http://www.bumped.org/psublog/feed/'
 
 async def update():
     """Return RSS data as XML string."""
-    async with aiohttp.ClientSession() as session:
-        async with session.get(source_url) as response:
-            global cache
-            cache = await parse(await response.text())
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(source_url) as response:
+                global cache
+                cache = await parse(await response.text())
+    except ut.GetErrors as e:
+        ut.note('Failed to GET: ' + source_url)
 
 async def parse(xml_text):
     """Parse the xml into string of date and clickable URL lines."""
