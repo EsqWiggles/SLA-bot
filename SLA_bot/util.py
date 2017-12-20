@@ -18,6 +18,7 @@ GetErrors = (aiohttp.ClientConnectorError, aiohttp.ClientOSError,
             aiohttp.ClientPayloadError, asyncio.TimeoutError)
 
 def note(message):
+    """Print the message to stdout prepended with the time and date."""
     localtime = dt.datetime.now(dt.timezone.utc).astimezone()
     #localtime.isoformat(timespec=seconds)) python v3.6
     print('[{}] {}'.format(localtime.strftime('%Y-%m-%dT%H:%M:%S%z'), message))
@@ -38,7 +39,7 @@ def print_new_exceptions():
     global known_exceptions
     stack_trace = str(traceback.extract_tb(sys.exc_info()[2]))
     if not stack_trace in known_exceptions:
-        if len(known_exceptions) >= 1000:
+        if len(known_exceptions) >= 20:
             known_exceptions.clear()
         known_exceptions[stack_trace] = True
         print('---- Ignored following error: ----', file=sys.stderr)
