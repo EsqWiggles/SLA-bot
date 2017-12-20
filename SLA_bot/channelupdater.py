@@ -4,6 +4,7 @@ Manage the update of modules and compile their text into one big message to
 send to the configured Discord channels.
 """
 
+import aiohttp
 import asyncio
 import datetime as dt
 
@@ -121,6 +122,7 @@ async def write_content(channel, content, embed):
     """
     global channel_messages
     message = channel_messages[channel]
+    fail_msg = 'Failed to send/edit message to channel:'
     try:
         if message == None:
             channel_messages[channel] = (
@@ -134,3 +136,9 @@ async def write_content(channel, content, embed):
         channel_messages[channel] = None
     except discord.errors.Forbidden:
         pass
+    except (aiohttp.ClientConnectorError, aiohttp.ClientOSError, 
+            asyncio.TimeoutError) as e:
+        ut.note('Connection timed out. {} {}'.format(fail_msg, channel))
+    except discord.errors.HTTPException as e:
+        ut.note('HTTP Error. {} {}\n {}'.format(fail_msg, channel, e))
+
