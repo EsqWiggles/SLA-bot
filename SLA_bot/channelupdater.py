@@ -77,9 +77,21 @@ async def update_messages():
     #Clock does not use external source so just update every message
     Clock.update()
     content, embed = await build_message()
+    ignored_errors = {}
     for channel, messages in channel_messages.items():
-        await write_content(channel, content, embed)
-    
+        try:
+            await write_content(channel, content, embed)
+        except ut.ConnectionErrors + (IndexError,) as e:
+            ignored_errors[type(e).__name__] = e
+        except discord.errors.HTTPException as e:
+            ignored_errors['HTTP error'] = e
+
+    if ignored_errors:
+        lines = ['Failed connection to Discord:']
+        for name, msg in ignored_errors.items():
+            lines.append('  {}: {}'.format(name, msg))
+        ut.note('\n'.join(lines))
+        
 async def updater(updateFunc, interval):
     """Create an update loop to call updateFunc every interval seconds."""
     while not bot.is_closed:
@@ -136,9 +148,5 @@ async def write_content(channel, content, embed):
         channel_messages[channel] = None
     except discord.errors.Forbidden:
         pass
-    except (aiohttp.ClientConnectorError, aiohttp.ClientOSError, 
-            asyncio.TimeoutError) as e:
-        ut.note('Connection timed out. {} {}'.format(fail_msg, channel))
-    except discord.errors.HTTPException as e:
-        ut.note('HTTP Error. {} {}\n {}'.format(fail_msg, channel, e))
+
 
