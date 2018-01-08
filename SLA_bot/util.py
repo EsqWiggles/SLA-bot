@@ -8,14 +8,16 @@ import datetime as dt
 import math
 import os
 import re
+import socket
 import sys
 import traceback
 
 known_exceptions = {}
 project_dir = os.path.dirname(os.path.dirname(__file__))
 
-GetErrors = (aiohttp.ClientConnectorError, aiohttp.ClientOSError, 
-            aiohttp.ClientPayloadError, asyncio.TimeoutError)
+ConnectionErrors = (aiohttp.ClientConnectorError, aiohttp.ClientOSError, 
+            asyncio.TimeoutError, socket.gaierror)
+GetErrors = ConnectionErrors + (aiohttp.ClientPayloadError,)
 
 def note(message):
     """Print the message to stdout prepended with the time and date."""
