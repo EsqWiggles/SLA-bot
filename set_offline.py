@@ -1,3 +1,12 @@
+"""Run Discord bot to set an offline message on channels
+
+Example:
+    This bot must be run on python 3.5 or later. Depending on your system,
+    python, python3, or python3.5 should be used. Because the channel based
+    messages regularly update countdowns relative to the current time, if the
+    bot stays offline for too long it becomes misleading.
+        $ python set_offline.py
+"""
 import asyncio
 import os
 
