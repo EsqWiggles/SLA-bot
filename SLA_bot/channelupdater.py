@@ -105,7 +105,7 @@ async def updater(updateFunc, interval):
 
 async def build_message():
     """Return the compiled text of the modules as a content and embed tuple."""
-    content = None
+    content = ' ' #clear any body text
     embed=discord.Embed(title=Clock.read(), description='** **',  color=color)
     alert_header, alert_body = AlertFeed.read().split('\n', maxsplit=1)
     if AlertFeed.is_unscheduled():
