@@ -150,7 +150,7 @@ def statusfevents(events, reference_time):
     """Return a string of lines of status and name for events in the list."""
     lines = []
     for e in events:
-        status = '{:>7}'.format(e.status(reference_time))
+        status = '{:\xa0>7}'.format(e.status(reference_time))
         lines.append('`|{:^9}|` **{}**'.format(status, e.name))
     return '\n'.join(lines)
 
