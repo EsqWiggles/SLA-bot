@@ -1,3 +1,16 @@
+v0.35 @ 2018-09-12
+    - Make alias groups for PSO2 Summary configurable
+    - Default config reloads when user config is
+    - Document the default config file
+    - Adjust display of remaining minutes to match most system clocks
+    - Move alert feed message ahead of the bumped RSS
+    - Show decimals when remaining time is a single digit minute 
+    - Add helpful links to offline message produced by set_offline.py
+    - Fix "next" command sometimes showing events that ended
+    - Fix bot not exiting easily with keyboard signals
+    
+    - Config file changes:
+        - Add "PSO2 Summary" section to group similar events
 v0.34 @ 2017-11-01
     - Tweak "next" command
         - Only print events that are ending in 90 minutes
