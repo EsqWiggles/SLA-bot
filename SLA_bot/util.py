@@ -83,24 +83,23 @@ def two_unit_tdelta(tdelta):
         The second number is a rounded 2 digit number left padded by a zero.
         However if it is minutes, the ceiling is taken instead of rounding.
     """
-    total_s = tdelta.total_seconds()
+    total_m =  math.ceil(tdelta.total_seconds()/60)
 
-    week, rem_s = divmod(total_s, 60*60*24*7)
-    day = round(rem_s/(60*60*24))
+    week, rem_m = divmod(total_m, 60*24*7)
+    day = round(rem_m/(60*24))
     if week >= 1:
         return '{}w {:02d}d'.format(int(week), day)
 
-    day, rem_s = divmod(total_s, 60*60*24)
-    hour = round(rem_s/(60*60))
+    day, rem_m = divmod(total_m, 60*24)
+    hour = round(rem_m/60)
     if day >=1:
         return '{}d {:02d}h'.format(int(day), hour)
 
-    hour, rem_s = divmod(total_s, 60*60)
-    minute = math.ceil(rem_s/60)
+    hour, minute = divmod(total_m, 60)
     if hour >=1:
-        return '{}h {:02d}m'.format(int(hour), minute)
+        return '{}h {:02d}m'.format(int(hour), int(minute))
 
-    return '{}m'.format(math.ceil(total_s/60))
+    return '{}m'.format(total_m)
     
 def one_unit_tdelta(tdelta):
     """Return the timedelta as a string with 1 unit of time. 
