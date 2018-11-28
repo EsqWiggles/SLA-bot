@@ -42,14 +42,18 @@ def read():
 
 def is_unscheduled():
     """Return whether the last announcement looks like an unscheduled event."""
-    # Unscheduled events typically list each ship number from 01: through 10:
-    # but sometimes does a partial list so this only checks for 3+ ship labels.
+    # Checks if 50% or more of the lines (-1 from the header) start with what
+    # looks like a ship label.
+    #    Unscheduled Ship label = ##:Event Name
+    #    Scheduled Time = ##:## Event Name
     # The regex matches if there are 2 numbers and a semicolon at the start of
-    # the line but not if 2 more numbers and a space follows it, since that is
-    # most likely a time label, like 13:00 Event Name, instead of a ship label.
+    # the line but not if 2 more numbers and a space follows it. In case an
+    # event name is added that starts with 2 digits and a space in the future,
+    # exclude the common minute times of 00 and 30 instead.
     if not cache:
         return True
-    return len(re.findall('^\d\d:(?!\d\d\s)', cache, flags=re.MULTILINE)) >= 3
+    ship_labels = re.findall('^\d\d:(?!\d\d\s)', cache, flags=re.MULTILINE)
+    return len(ship_labels) / cache.count('\n') >= 0.50
 
 def align_shiplabels(text):
     """Return the announcement with the ship labels aligned."""
