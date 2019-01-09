@@ -81,7 +81,7 @@ class UserCommands:
             await self.bot.say('No more scheduled events.')
 
     @commands.command(pass_context=True, no_pm=True, help = cs.TOGGLE_HELP)
-    async def toggle(ctx):
+    async def toggle(self, ctx):
         """Subscribe/unsubscribe current channel to automated messages."""
         perm = ctx.message.channel.permissions_for(ctx.message.author)
         if perm.manage_channels:
@@ -93,3 +93,4 @@ class UserCommands:
                 cf.set('Channels', id, '')
             cf.save()
             await ChannelUpdater.load_channels()
+            
