@@ -20,11 +20,11 @@ FIND_HELP = ('Find upcoming events by name.\n'
 '    find              (shows the next few events)\n'
 '    find minING       (ignores weird capital)\n'
 '    find "mining base"(need quotes for two words)\n'
-'    find "" all       (need quotes for blacnk search)')
+'    find "" all       (need quotes for blank search)')
 
-NEXT_HELP = ('Find the next scheduled event by name.\n'
-'Only shows events that have not started. This command may output'
-' more than one event if their start times are close together.')
+NEXT_HELP = ('Find the next scheduled event.\n'
+'Shows the current event if it has not ended and the next event.'
+' May show another event if its start time is close together.')
 
 TOGGLE_HELP = ('Enable or disable the bot data on a channel.\n'
 "Enables the automatic bot's messages in the channel.This should be used on a"
@@ -34,5 +34,5 @@ TOGGLE_HELP = ('Enable or disable the bot data on a channel.\n'
 '\n'
 'To disable on a channel, use this command on the channel again.\n'
 '\n'
-'This command requires the "Manage Channels" permission.')
+'This command requires the user to have "Manage Channels" permission.')
 

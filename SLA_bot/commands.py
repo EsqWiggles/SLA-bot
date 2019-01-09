@@ -60,7 +60,7 @@ class UserCommands:
             await self.bot.say(msg[:2000])
 
     @commands.command(help = cs.NEXT_HELP)
-    async def next(self, search='',):
+    async def next(self):
         """Send a message with the current and next event."""
         now = dt.datetime.now(dt.timezone.utc)
         events =  PSO2Calendar.events
