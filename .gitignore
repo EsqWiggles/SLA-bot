@@ -1,4 +1,8 @@
 __pycache__
 
 config.ini
+*.bat
 *.log
+*.sh
+!loop.bat
+!loop.sh
