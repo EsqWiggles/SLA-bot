@@ -1,3 +1,6 @@
+v0.37 @ 2019-01-25
+    - Simplify editing a copy of the loop scripts
+    
 v0.36 @ 2019-01-09
     - Add a README
     - Add infinite looping scripts for the bot
