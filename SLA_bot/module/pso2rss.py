@@ -56,9 +56,10 @@ async def parse(xml_text):
         if link:
             link = html.unescape(link)
             translate = translate_base + urllib.parse.quote_plus(link)
-            shortened = await shorten_url(translate)
+            #shortened = await shorten_url(translate)
             link_name = link.replace(common_url, '')
-            lines.append('`{}` [{}]({})'.format(date, link_name, shortened))
+            #lines.append('`{}` [{}]({})'.format(date, link_name, shortened))
+            lines.append('`{}` [{}]({})'.format(date, link_name, link))
     return '\n'.join(lines)
 
 async def shorten_url(url):
