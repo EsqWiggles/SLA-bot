@@ -109,14 +109,14 @@ async def build_message():
     embed=discord.Embed(title=Clock.read(), description='** **',  color=color)
     alert_header, alert_body = AlertFeed.read().split('\n', maxsplit=1)
     if AlertFeed.is_unscheduled():
-        embed.add_field(name=alert_header, value=alert_body)
+        embed.add_field(name=alert_header, value=alert_body, inline=False)
     if PSO2Calendar.events:
         embed.add_field(name='**PSO2 Schedule**', value=PSO2Calendar.read())
         embed.add_field(name='**PSO2 Summary**', value=PSO2Summary.read())
     if PSO2esCal.events:
-        embed.add_field(name='**PSO2es**', value=PSO2esCal.read())
+        embed.add_field(name='**PSO2es**', value=PSO2esCal.read(), inline=False)
     if not AlertFeed.is_unscheduled():
-        embed.add_field(name=alert_header, value=alert_body)
+        embed.add_field(name=alert_header, value=alert_body, inline=False)
     embed.add_field(name='bumped.org', value=bumpedRSS.read(), inline=False)
     embed.add_field(name='pso2.jp/players/...', value=PSO2RSS.read())
     return (content, embed)
