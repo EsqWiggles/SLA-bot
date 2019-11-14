@@ -1,3 +1,7 @@
+v0.38 @ 2019-11-14
+    - Removed translated RSS links, google service discontinued
+    - Fixed bug where fields are squished together
+
 v0.37 @ 2019-01-25
     - Simplify editing a copy of the loop scripts
     
