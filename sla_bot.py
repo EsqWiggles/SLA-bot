@@ -46,12 +46,12 @@ bot.add_cog(UserCommands(bot))
 
 async def bot_status(bot):
     """Run a clock on the bot's status line."""
-    while not bot.is_closed:
+    while not bot.is_closed():
         try:
             now = dt.datetime.now(dt.timezone.utc)
             time = now.astimezone(tzone).strftime('%H:%M %Z')
             status = '{} - {}help'.format(time, prefix)
-            await bot.change_presence(game=discord.Game(name=status)) 
+            await bot.change_presence(activity=discord.Game(status))
         except Exception:
             ut.print_new_exceptions()
         now = dt.datetime.now(dt.timezone.utc)
@@ -61,13 +61,14 @@ async def bot_status(bot):
 async def on_ready():
     print('Logged in as: {}'.format(bot.user.name))
     print('------')
-    
+
     #This method may be called more than once
     global initialized
     if not initialized:
         await ChannelUpdater.init(bot)
         bot.loop.create_task(bot_status(bot))
         initialized = True
+
 
 
 bot.run(cf.get('General', 'bot_token'))

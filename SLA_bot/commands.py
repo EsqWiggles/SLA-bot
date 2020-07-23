@@ -32,12 +32,12 @@ def strfevent(event, ref_time):
     range = event.time_range(tzone)
     return '`|{:^9}|` **{}** @ {}'.format(status, event.name, range)
 
-class UserCommands:
+class UserCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(help = cs.FIND_HELP)
-    async def find(self, search='', mode=''):
+    async def find(self, ctx, search='', mode=''):
         """Send a message with the future events matching the search."""
         now = dt.datetime.now(dt.timezone.utc) 
         lsearch = search.lower()
@@ -55,12 +55,12 @@ class UserCommands:
             msg = 'No scheduled "{}" found.'.format(search or 'events')
             
         if found and len(trimmed) > max:
-            await self.bot.whisper(msg[:2000])
+            await ctx.author.send(msg[:2000])
         else:
-            await self.bot.say(msg[:2000])
+            await ctx.send(msg[:2000])
 
     @commands.command(help = cs.NEXT_HELP)
-    async def next(self):
+    async def next(self, ctx):
         """Send a message with the current and next event."""
         now = dt.datetime.now(dt.timezone.utc)
         events =  PSO2Calendar.events
@@ -76,16 +76,16 @@ class UserCommands:
         if found:
             lines = [strfevent(event, now) for event in found]
             msg = '\n'.join(lines)
-            await self.bot.say(msg[:2000])
+            await ctx.send(msg[:2000])
         else:
-            await self.bot.say('No more scheduled events.')
+            await ctx.send('No more scheduled events.')
 
-    @commands.command(pass_context=True, no_pm=True, help = cs.TOGGLE_HELP)
+    @commands.command(no_pm=True, help = cs.TOGGLE_HELP)
     async def toggle(self, ctx):
         """Subscribe/unsubscribe current channel to automated messages."""
         perm = ctx.message.channel.permissions_for(ctx.message.author)
         if perm.manage_channels:
-            id = ctx.message.channel.id
+            id = str(ctx.message.channel.id)
             cf.reload()
             if id in cf.channels():
                 cf.remove_option('Channels', id)

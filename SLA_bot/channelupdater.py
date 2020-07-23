@@ -49,7 +49,7 @@ async def load_channels():
     global channel_messages
     channel_messages = {}
     for c in cf.channels():
-        chan = bot.get_channel(c)
+        chan = bot.get_channel(int(c))
         channel_messages[chan] = await recycle_messages(chan)
 
 async def recycle_messages(channel):
@@ -64,8 +64,7 @@ async def recycle_messages(channel):
         A Message object of the last message sent by this bot or None.
     """
     try:
-        messages = bot.logs_from(channel, 100)
-        async for msg in messages:
+        async for msg in channel.history(limit=100):
             if msg.author.id == bot.user.id and msg.embeds:
                 return msg
     except (discord.errors.Forbidden, discord.errors.NotFound):
@@ -94,7 +93,7 @@ async def update_messages():
         
 async def updater(updateFunc, interval):
     """Create an update loop to call updateFunc every interval seconds."""
-    while not bot.is_closed:
+    while not bot.is_closed():
         try:
             await updateFunc()
         except asyncio.CancelledError:
@@ -121,15 +120,15 @@ async def build_message():
     embed.add_field(name='pso2.jp/players/...', value=PSO2RSS.read())
     return (content, embed)
         
-async def write_content(channel, content, embed):
-    """Send the content with the embed into the channel.
+async def write_content(channel, body, embed):
+    """Send the body with the embed into the channel.
     
     Edit the last known message if one is found, otherwise send a new message.
     
     Args:
         channel (str): ID of the channel to write into.
-        content (str): Plain text of the message to be sent.
-        embed (Embed): discord.Embed object to send with the content.
+        body (str): Plain text of the message to be sent.
+        embed (Embed): discord.Embed object to send with the body.
     
     """
     global channel_messages
@@ -137,13 +136,9 @@ async def write_content(channel, content, embed):
     fail_msg = 'Failed to send/edit message to channel:'
     try:
         if message == None:
-            channel_messages[channel] = (
-                await bot.send_message(channel,content, embed=embed)
-            )
+            channel_messages[channel] = await channel.send(body, embed=embed)
         else: 
-            channel_messages[channel] = (
-                await bot.edit_message(message, content, embed=embed)
-            )
+            await message.edit(content=body, embed=embed)
     except discord.errors.NotFound: 
         channel_messages[channel] = None
     except discord.errors.Forbidden:
