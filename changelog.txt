@@ -1,3 +1,6 @@
+v0.39 @ 2020-07-23
+    - Migrate to discord.py v1.0, make sure to update library
+
 v0.38 @ 2019-11-14
     - Removed translated RSS links, google service discontinued
     - Fixed bug where fields are squished together
